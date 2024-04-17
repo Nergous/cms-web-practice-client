@@ -1,0 +1,33 @@
+.member__page {
+    text-align: center;
+    display: block;
+    max-width: 800px;
+    color: black;
+}
+
+.member__img {
+    max-height: 600px;
+}
+
+.data__table {
+    border: 1px solid white;
+}
+
+.data_right {
+    padding-left: 20px;
+}
+.data_left {
+    padding-right: 20px;
+}
+
+.title {
+    color: black;
+    font-size: 60px;
+    font-style: italic;
+    font-weight: 500;
+    padding-bottom: 30px;
+}
+
+table {
+    margin-bottom: 20px;
+}

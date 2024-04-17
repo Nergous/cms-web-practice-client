@@ -1,0 +1,41 @@
+.parent {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(7, 1fr);
+    grid-column-gap: 0px;
+    grid-row-gap: 0px;
+    color: black;
+}
+
+.div1 {
+    grid-area: 1 / 1 / 2 / 3;
+    font-style: italic;
+    font-size: 50px;
+    text-align: center;
+}
+
+.div2 {
+    grid-area: 2 / 1 / 8 / 2;
+}
+
+.div3 {
+    grid-area: 2 / 2 / 8 / 3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.img {
+    max-width: 600px;
+}
+
+.tracks {
+    color: white;
+    min-width: 400px;
+    margin: 5px;
+    background-color: grey;
+    border-radius: 15px;
+    font-size: 30px;
+    text-align: center;
+}

@@ -1,0 +1,20 @@
+.navbar__main {
+    margin: 0 50px;
+    height: 100px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 20px;
+}
+
+.navbar__item__main {
+    padding: 10px;
+    text-decoration: none;
+    background-color: transparent;
+    transition: color 0.3s ease;
+    color: #5a5a5a;
+}
+
+.navbar__item__main:hover {
+    color: rgb(0, 0, 0);
+}

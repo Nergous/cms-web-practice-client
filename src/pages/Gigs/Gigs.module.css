@@ -1,0 +1,19 @@
+.gig__outer {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.gig__panel {
+    min-width: 800px;
+    min-height: 100px;
+
+    padding: 20px;
+
+    margin: 50px auto;
+
+    background: white;
+    color: black;
+    font-size: 30px;
+    text-align: center;
+}

@@ -1,0 +1,18 @@
+.footer {
+    height: 50px;
+    z-index: 1;
+    background: white;
+    color: black;
+}
+
+.footer_text_right{
+    right: 15px;
+    padding: 10px;
+    position: absolute;
+} 
+
+.footer_text_left {
+    left: 15px;
+    padding: 10px;
+    position: absolute;
+} 

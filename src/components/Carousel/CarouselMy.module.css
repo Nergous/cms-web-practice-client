@@ -1,0 +1,11 @@
+.carousel__mine {
+    position: static;
+    max-width: 1300px;
+    display: block;
+    margin: 0 auto;
+}
+
+.image__carousel {
+    max-height: 100vh;
+    align-items: center;
+}
