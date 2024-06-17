@@ -1,39 +1,27 @@
-import React, { PureComponent } from "react";
+import React, { useEffect, useState } from "react";
 import { AppSidebar, AppFooter, AppHeader } from "../../components";
 import CardsMembers from "../AdminMembers/CardsMembers";
 
+import { Link, Route, Routes } from "react-router-dom";
+import EditMembers from "../AdminMembers/EditMembers";
+import axios from "axios";
+
+
 const AdminMembers = () => {
-    const items = [
-        {
-            id: 1,
-            name: "Ярик",
-            text: "Какой то текст от Ярика",
-            img: "iam.jpg",
-        },
-        {
-            id: 2,
-            name: "Даша",
-            text: "Какой то текст от Даши",
-            img: "dasha.jpg",
-        },
-        {
-            id: 3,
-            name: "Лена",
-            text: "Какой то текст от Лены",
-            img: "lena.jpg",
-        },
-        {
-            id: 4,
-            name: "Олег",
-            text: "Какой то текст от Олега",
-            img: "oleg.jpg",
-        },
-    ];
+    const [items, setItems] = useState([]);
+
+    useEffect(() => {
+        axios.get("http://localhost:3001/members").then((response) => {
+            setItems(response.data);
+        });
+    }, []);
+
     return (
         <>
             <AppSidebar />
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
+                <Link to="/admin/members/create"> Создать </Link>
                 <div className="body flex-grow-1">
                     <div
                         style={{
@@ -54,6 +42,12 @@ const AdminMembers = () => {
                 </div>
                 <AppFooter />
             </div>
+            <Routes>
+                <Route
+                    path=":id/edit"
+                    element={<EditMembers />}
+                />
+            </Routes>
         </>
     );
 };

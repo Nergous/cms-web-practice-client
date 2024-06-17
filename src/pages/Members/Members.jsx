@@ -4,6 +4,7 @@ import Member from "./Member/Member";
 import LazyLoad from "react-lazyload";
 
 const Members = () => {
+    
     const [modal, setModal] = useState(false);
     let members = [
         {

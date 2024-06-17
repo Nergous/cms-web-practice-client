@@ -6,6 +6,10 @@ import {
     AppHeader,
 } from "../components/index";
 
+import { CForm, CFormInput, CButton } from "@coreui/react";
+
+import { useState } from "react";
+
 const DefaultLayout = ({ items }) => {
     return (
         <div>
@@ -13,7 +17,17 @@ const DefaultLayout = ({ items }) => {
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
                 <div className="body flex-grow-1">
-                    {/* <AppContent items={items} /> */}
+                    Текст на основной странице
+                    <CForm>
+                        <CFormInput
+                            type="textarea"
+                            id="exampleFormControlTextarea1"
+                            rows="3"
+                        />
+                        <CButton color="primary" >
+                            Save
+                        </CButton>
+                    </CForm>
                 </div>
                 <AppFooter />
             </div>

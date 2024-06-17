@@ -1,16 +1,17 @@
-import React, { PureComponent } from "react";
+import React, { useState, useEffect } from "react";
 import { AppSidebar, AppFooter, AppHeader } from "../../components";
 import CardsMusic from "./CardsMusic";
+import { Link } from "react-router-dom";
+import axios from "axios";
 
 const AdminMusic = () => {
-    const items = [
-        { id: 1, name: "Трек1", duration: "6:00" },
-        { id: 2, name: "Трек2", duration: "6:00" },
-        { id: 3, name: "Трек3", duration: "6:00" },
-        { id: 4, name: "Трек4", duration: "6:00" },
-        { id: 5, name: "Трек5", duration: "6:00" },
-        { id: 6, name: "Трек6", duration: "6:00" },
-    ];
+    const [items, setItems] = useState([]);
+
+    useEffect(() => {
+        axios.get("http://localhost:3001/record").then((response) => {
+            setItems(response.data);
+        });
+    }, []);
 
     return (
         <>
@@ -18,6 +19,7 @@ const AdminMusic = () => {
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
                 <div className="body flex-grow-1">
+                    <Link to="/admin/music/create">Создать альбом</Link>
                     <div
                         style={{
                             display: "flex",

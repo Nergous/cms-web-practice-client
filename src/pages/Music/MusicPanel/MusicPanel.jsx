@@ -1,34 +1,58 @@
 import React from "react";
 import cl from "./MusicPanel.module.css";
+import axios from "axios";
+import { useEffect, useState } from "react";
+
 const MusicPanel = ({ music }) => {
-    const tracks = [
-        { id: 1, name: "Трек1", duration: "6:00" },
-        { id: 2, name: "Трек1", duration: "6:00" },
-        { id: 3, name: "Трек1", duration: "6:00" },
-        { id: 4, name: "Трек1", duration: "6:00" },
-        { id: 5, name: "Трек1", duration: "6:00" },
-        { id: 6, name: "Трек1", duration: "6:00" },
-        { id: 7, name: "Трек1", duration: "6:00" },
-        { id: 8, name: "Трек1", duration: "6:00" },
-        { id: 9, name: "Трек1", duration: "6:00" },
-        { id: 10, name: "Трек1", duration: "6:00" },
-        { id: 11, name: "Трек1", duration: "6:00" },
-        { id: 12, name: "Трек1", duration: "6:00" },
-    ];
+    const [tracksList, setTracksList] = useState([]);
+    const [associationList, setAssociationList] = useState([]);
+    const [tracksForRecord, setTracksForRecord] = useState([]);
+
+    useEffect(() => {
+        axios.get("http://localhost:3001/tracks").then((response) => {
+            setTracksList(response.data);
+        });
+        axios.get("http://localhost:3001/tracks_in_record").then((response) => {
+            setAssociationList(response.data);
+        });
+    }, []);
+
+    useEffect(() => {
+        if (music && tracksList.length > 0 && associationList.length > 0) {
+            const tracksForGivenRecord = getTracksForRecord(
+                music,
+                tracksList,
+                associationList
+            );
+            setTracksForRecord(tracksForGivenRecord);
+        }
+    }, [music, tracksList, associationList]);
+
+    function getTracksForRecord(record, tracks, tracksInRecord) {
+        const recordIdList = associationList.filter(
+            (association) => association.id_record === music.id
+        );
+        console.log(recordIdList);
+        const tracksForRecord = recordIdList.map((recordId) => {
+            return tracks.find((track) => track.id === recordId.id_track);
+        });
+        return tracksForRecord;
+    }
+
     if (!music) {
         return <></>;
     }
     return (
         <div>
             <div className={cl.parent}>
-                <div className={cl.div1}>{music.title}</div>
+                <div className={cl.div1}>{music.record_name}</div>
                 <div className={cl.div2}>
                     <img className={cl.img} src="vinyl.jpg" alt="music"></img>
                 </div>
                 <div className={cl.div3}>
-                    {tracks.map((track) => (
+                    {tracksForRecord.map((track) => (
                         <div className={cl.tracks} key={track.id}>
-                            {track.id} -- {track.name} -- {track.duration}
+                            {track.id} -- {track.track_name}
                         </div>
                     ))}
                 </div>

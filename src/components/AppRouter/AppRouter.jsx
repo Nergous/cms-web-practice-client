@@ -8,7 +8,7 @@ import Admin from "../../pages/Admin/Admin";
 
 const AppRouter = () => {
     return (
-        <div>
+        <>
             <Routes>
                 <Route path="/" element={<Main />}></Route>
                 <Route path="/members" element={<Members />}></Route>
@@ -17,7 +17,7 @@ const AppRouter = () => {
                 <Route path="/admin/*" element={<Admin />}></Route>
                 <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-        </div>
+        </>
     );
 };
 

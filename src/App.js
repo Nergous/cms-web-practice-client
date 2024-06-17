@@ -6,6 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import AppRouter from "./components/AppRouter/AppRouter";
 import CarouselMy from "./components/Carousel/CarouselMy";
 import Admin from "./pages/Admin/Admin";
+import { useEffect } from "react";
+import axios from "axios";
 
 function App() {
     return (

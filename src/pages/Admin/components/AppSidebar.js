@@ -1,6 +1,4 @@
 import React from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { Provider } from 'react-redux';
 
 import {
   CCloseButton,
@@ -35,6 +33,11 @@ const AppSidebar = () => {
             name: "Gigs",
             to: '/admin/gigs',
         },
+        {
+            component: CNavLink,
+            name: "Roles",
+            to: "/admin/roles",
+        }
     ]
 
   return (

@@ -48,7 +48,7 @@ const AppHeader = () => {
             <CContainer className="border-bottom px-4" fluid>
                 <CHeaderNav className="d-none d-md-flex">
                     <CNavItem>
-                        <CNavLink to="/dashboard" as={NavLink}>
+                        <CNavLink to="/admin" as={NavLink}>
                             Dashboard
                         </CNavLink>
                     </CNavItem>

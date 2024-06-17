@@ -1,46 +1,53 @@
 import React, { Suspense, useEffect } from "react";
 import { HashRouter, Route, Routes } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { Navigate } from "react-router-dom";
 
 import "./scss/style.scss";
 import AdminMusic from "./pages/AdminMusic/AdminMusic";
 import AdminMembers from "./pages/AdminMembers/AdminMembers";
 import AdminGigs from "./pages/AdminGigs/AdminGigs";
-import AdminMain from "./pages/AdminMain/AdminMain";
+
 import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
-import { AppContent } from "./components";
+
+import CreateMembers from "./pages/AdminMembers/CreateMembers";
+import EditMembers from "./pages/AdminMembers/EditMembers";
+
+import CreateMusic from "./pages/AdminMusic/CreateMusic";
+import EditMusic from "./pages/AdminMusic/EditMusic";
+
+import CreateGigs from "./pages/AdminGigs/CreateGigs";
+import EditGigs from "./pages/AdminGigs/EditGigs";
+
+import AdminRoles from "./pages/AdminRoles/AdminRoles";
+import EditRoles from "./pages/AdminRoles/EditRoles";
+import CreateRoles from "./pages/AdminRoles/CreateRoles";
 
 // Containers
 const DefaultLayout = React.lazy(() => import("./layout/DefaultLayout"));
-
-// Pages
-// const Login = React.lazy(() => import('./views/pages/login/Login'))
-// const Register = React.lazy(() => import('./views/pages/register/Register'))
-// const Page404 = React.lazy(() => import('./views/pages/page404/Page404'))
-// const Page500 = React.lazy(() => import('./views/pages/page500/Page500'))
 
 const Admin = () => {
     return (
         <>
             <Routes>
                 <Route path="/music" element={<AdminMusic />} />
-                <Route path="/members" element={<AdminMembers />} />
-                <Route path="/gigs" element={<AdminGigs />} />
-                <Route path="/main" element={<AdminMain />} />
-                <Route path="/" element={<AdminDashboard />} />
-            </Routes> 
-        </>
+                <Route path="/music/*" element={<AdminMusic />} />
+                <Route path="/music/create" element={<CreateMusic />} />
+                <Route path="/music/:id/edit" element={<EditMusic />} />
 
-        // // <HashRouter>
-        //      <Routes>
-        //        {/* <Route exact path="/login" name="Login Page" element={<Login />} />
-        //        <Route exact path="/register" name="Register Page" element={<Register />} />
-        //        <Route exact path="/404" name="Page 404" element={<Page404 />} />
-        //        <Route exact path="/500" name="Page 500" element={<Page500 />} />  */}
-        //        <Route path="*" name="Home" element={<DefaultLayout />} />
-        //      </Routes>
-        // // </HashRouter>
+                <Route path="/members/*" element={<AdminMembers />} />
+                <Route path="/members/create" element={<CreateMembers />} />
+                <Route path="/members/:id/edit" element={<EditMembers />} />
+
+                <Route path="/gigs/*" element={<AdminGigs />} />
+                <Route path="/gigs/create" element={<CreateGigs />} />
+                {/* <Route path="/gigs/:id/edit" element={<EditGigs />} /> */}
+
+                <Route path="/roles/*" element={<AdminRoles />} />
+                <Route path="/roles/:id/edit" element={<EditRoles />} />
+                <Route path="/roles/create" element={<CreateRoles />} />
+
+                <Route path="/" element={<AdminDashboard />} />
+            </Routes>
+        </>
     );
 };
 

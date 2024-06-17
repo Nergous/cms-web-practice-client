@@ -1,6 +1,7 @@
 import React, { PureComponent } from "react";
 import { AppContent, AppSidebar, AppFooter, AppHeader } from "../../components";
 import CardsGigs from "./CardsGigs";
+import { Link } from "react-router-dom";
 
 const AdminGigs = () => {
     const items = [
@@ -35,6 +36,7 @@ const AdminGigs = () => {
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
                 <div className="body flex-grow-1">
+                    <Link to="/admin/gigs/create">Создать выступление</Link>
                     <div
                         style={{
                             display: "flex",
@@ -45,10 +47,7 @@ const AdminGigs = () => {
                         }}
                     >
                         {items.map((item) => (
-                            <CardsGigs
-                                key={item.id}
-                                item={item}
-                            ></CardsGigs>
+                            <CardsGigs key={item.id} item={item}></CardsGigs>
                         ))}
                     </div>
                 </div>
