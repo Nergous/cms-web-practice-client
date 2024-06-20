@@ -2,34 +2,25 @@ import React, { PureComponent } from "react";
 import { AppContent, AppSidebar, AppFooter, AppHeader } from "../../components";
 import CardsGigs from "./CardsGigs";
 import { Link } from "react-router-dom";
+import axios from "axios";
+import { useEffect, useState } from "react";
 
 const AdminGigs = () => {
-    const items = [
-        {
-            id: 1,
-            title: "Выпускной 2022",
-            place: "СЛИ",
-            link: "https://google.com",
-        },
-        {
-            id: 2,
-            title: "Концерт Паратех - tu:bi:",
-            place: "бар Маяковский",
-            link: "https://google.com",
-        },
-        {
-            id: 3,
-            title: "Ночь в музее",
-            place: "Национальная галерея",
-            link: "https://google.com",
-        },
-        {
-            id: 4,
-            title: "Квартирник",
-            place: "Кофейня Арабико",
-            link: "https://google.com",
-        },
-    ];
+    const [items, setItems] = useState([]);
+    const getItems = async () => {
+        try {
+            const response = await axios.get("http://localhost:3001/gigs");
+            setItems(response.data);
+            console.log(response.data);
+        } catch (error) {
+            console.error(error);
+        }
+    };
+
+    useEffect(() => {
+        getItems();
+    }, []);
+
     return (
         <>
             <AppSidebar />

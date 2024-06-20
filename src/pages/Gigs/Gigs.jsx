@@ -1,36 +1,17 @@
-import React, {useState} from "react";
+import React, { useState, useEffect } from "react";
 import cl from "./Gigs.module.css";
 import Gig from "./GIg/Gig";
 import Modal from "../../components/Modal/Modal";
-
+import axios from "axios";
 
 const Gigs = () => {
-    const gigs = [
-        {
-            id: 1,
-            title: "Выпускной 2022",
-            place: "СЛИ",
-            link: "https://google.com",
-        },
-        {
-            id: 2,
-            title: "Концерт Паратех - tu:bi:",
-            place: "бар Маяковский",
-            link: "https://google.com",
-        },
-        {
-            id: 3,
-            title: "Ночь в музее",
-            place: "Национальная галерея",
-            link: "https://google.com",
-        },
-        {
-            id: 4,
-            title: "Квартирник",
-            place: "Кофейня Арабико",
-            link: "https://google.com",
-        },
-    ];
+    const [gigs, setGigs] = useState([]);
+
+    useEffect(() => {
+        axios.get("http://localhost:3001/gigs").then((response) => {
+            setGigs(response.data);
+        });
+    }, []);
 
     const [selectedGig, setSelectedGig] = useState(null);
     const [modal, setModal] = useState(false);
@@ -43,15 +24,18 @@ const Gigs = () => {
     return (
         <div className={cl.gig__outer}>
             {gigs.map((gig) => (
-                <button className={cl.gig__panel} key={gig.id} onClick={() => handleGigClick(gig)}>
-                    {gig.id} -- {gig.title} -- {gig.place}
+                <button
+                    className={cl.gig__panel}
+                    key={gig.id}
+                    onClick={() => handleGigClick(gig)}
+                >
+                    {gig.title} -- {gig.place}
                 </button>
             ))}
             <Modal visible={modal} setVisible={setModal}>
                 <Gig gig={selectedGig} />
             </Modal>
         </div>
-        
     );
 };
 

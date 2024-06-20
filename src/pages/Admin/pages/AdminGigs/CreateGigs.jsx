@@ -1,8 +1,16 @@
-import React from "react";
-import { CForm, CCol, CFormInput, CButton, CFormSelect } from "@coreui/react";
+import React, { useEffect } from "react";
+import {
+    CForm,
+    CCol,
+    CFormInput,
+    CButton,
+    CFormSelect,
+    CListGroup,
+    CListGroupItem,
+} from "@coreui/react";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import axios from "axios";
 
 const CreateGigs = () => {
     const [validated, setValidated] = useState(false);
@@ -12,13 +20,38 @@ const CreateGigs = () => {
     const [date, setDate] = useState("");
     const [status, setStatus] = useState("soon");
     const [participants, setParticipants] = useState([]);
-    const [availableParticipants, setAvailableParticipants] = useState([
-        "Participant1",
-        "Participant2",
-        "Participant3",
-    ]);
-    const [showParticipantSelect, setShowParticipantSelect] = useState(false);
-    const [selectedParticipant, setSelectedParticipant] = useState("");
+    const [selectedParticipantId, setSelectedParticipantId] = useState("");
+    const [availableParticipants, setAvailableParticipants] = useState([]);
+
+    const getMembers = () => {
+        axios
+            .get("http://localhost:3001/members")
+            .then((response) => {
+                setAvailableParticipants(response.data);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+    };
+
+    useEffect(() => {
+        getMembers();
+    }, []);
+
+    const handleAddParticipant = () => {
+        const selectedParticipant = availableParticipants.find(
+            (p) => p.id == selectedParticipantId
+        );
+        if (selectedParticipant) {
+            setParticipants([...participants, selectedParticipant]);
+            setAvailableParticipants(
+                availableParticipants.filter(
+                    (p) => p.id != selectedParticipantId
+                )
+            );
+            setSelectedParticipantId("");
+        }
+    };
 
     const handleSubmit = (event) => {
         const form = event.currentTarget;
@@ -27,19 +60,27 @@ const CreateGigs = () => {
             event.stopPropagation();
         }
 
+        const data = {
+            title: title,
+            social_link: socialLink,
+            venue: venue,
+            date: date,
+            status: status,
+            participants: participants,
+        };
+
+        axios
+            .post("http://localhost:3001/gigs", data)
+            .then((response) => {
+                console.log(response.data);
+            })
+            .catch((error) => {
+                console.error(error);
+            });
+
         setValidated(true);
     };
 
-    const addParticipant = () => {
-        if (selectedParticipant) {
-            setParticipants([...participants, selectedParticipant]);
-            setAvailableParticipants(
-                availableParticipants.filter((p) => p !== selectedParticipant)
-            );
-            setSelectedParticipant("");
-            setShowParticipantSelect(false);
-        }
-    };
     return (
         <>
             <AppSidebar />
@@ -111,59 +152,43 @@ const CreateGigs = () => {
                             </CFormSelect>
                         </CCol>
                         <CCol md={6}>
-                            <CButton
-                                color="primary"
-                                onClick={() => setShowParticipantSelect(true)}
-                                disabled={availableParticipants.length === 0}
-                            >
-                                Добавить участника
-                            </CButton>
-                            {showParticipantSelect && (
-                                <CFormSelect
-                                    feedbackValid="Looks good!"
-                                    id="participantSelect"
-                                    label="Выберите участника"
-                                    value={selectedParticipant}
-                                    onChange={(e) =>
-                                        setSelectedParticipant(e.target.value)
-                                    }
-                                >
-                                    <option value="">Выберите участника</option>
-                                    {availableParticipants.map(
-                                        (participant, index) => (
-                                            <option
-                                                key={index}
-                                                value={participant}
-                                            >
-                                                {participant}
-                                            </option>
-                                        )
-                                    )}
-                                </CFormSelect>
-                            )}
-                            {showParticipantSelect && (
-                                <CButton
-                                    color="success"
-                                    onClick={addParticipant}
-                                >
-                                    Добавить
-                                </CButton>
-                            )}
                             <CFormSelect
-                                feedbackValid="Looks good!"
-                                id="participants"
-                                label="Участники"
-                                multiple
-                                value={participants}
-                                readOnly
+                                value={selectedParticipantId}
+                                onChange={(e) =>
+                                    setSelectedParticipantId(e.target.value)
+                                }
+                                label="Select Participant"
                             >
-                                {participants.map((participant, index) => (
-                                    <option key={index} value={participant}>
-                                        {participant}
+                                <option value="">Choose...</option>
+                                {availableParticipants.map((participant) => (
+                                    <option
+                                        key={participant.id}
+                                        value={participant.id}
+                                    >
+                                        {participant.name_of_member}
                                     </option>
                                 ))}
                             </CFormSelect>
                         </CCol>
+                        <CCol md={6}>
+                            <CButton
+                                color="primary"
+                                onClick={handleAddParticipant}
+                                disabled={!availableParticipants.length}
+                            >
+                                Add Participant
+                            </CButton>
+                        </CCol>
+                        <CCol md={12}>
+                            <CListGroup>
+                                {participants.map((participant) => (
+                                    <CListGroupItem key={participant.id}>
+                                        {participant.name_of_member}
+                                    </CListGroupItem>
+                                ))}
+                            </CListGroup>
+                        </CCol>
+
                         <CCol xs={12}>
                             <CButton color="primary" type="submit">
                                 Submit form

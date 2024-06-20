@@ -21,31 +21,51 @@ import AdminRoles from "./pages/AdminRoles/AdminRoles";
 import EditRoles from "./pages/AdminRoles/EditRoles";
 import CreateRoles from "./pages/AdminRoles/CreateRoles";
 
+import AdminAuth from "./AdminAuth";
+import { Navigate } from "react-router-dom";
+
 // Containers
 const DefaultLayout = React.lazy(() => import("./layout/DefaultLayout"));
 
 const Admin = () => {
+    const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+    console.log(isAuthenticated);
     return (
         <>
             <Routes>
-                <Route path="/music" element={<AdminMusic />} />
-                <Route path="/music/*" element={<AdminMusic />} />
-                <Route path="/music/create" element={<CreateMusic />} />
-                <Route path="/music/:id/edit" element={<EditMusic />} />
+                {isAuthenticated && (
+                    <>
+                        <Route path="/" element={<AdminDashboard />} />
+                        <Route path="/music" element={<AdminMusic />} />
+                        <Route path="/music/*" element={<AdminMusic />} />
+                        <Route path="/music/create" element={<CreateMusic />} />
+                        <Route path="/music/:id/edit" element={<EditMusic />} />
 
-                <Route path="/members/*" element={<AdminMembers />} />
-                <Route path="/members/create" element={<CreateMembers />} />
-                <Route path="/members/:id/edit" element={<EditMembers />} />
+                        <Route path="/members/*" element={<AdminMembers />} />
+                        <Route
+                            path="/members/create"
+                            element={<CreateMembers />}
+                        />
+                        <Route
+                            path="/members/:id/edit"
+                            element={<EditMembers />}
+                        />
 
-                <Route path="/gigs/*" element={<AdminGigs />} />
-                <Route path="/gigs/create" element={<CreateGigs />} />
-                {/* <Route path="/gigs/:id/edit" element={<EditGigs />} /> */}
+                        <Route path="/gigs/*" element={<AdminGigs />} />
+                        <Route path="/gigs/create" element={<CreateGigs />} />
+                        <Route path="/gigs/:id/edit" element={<EditGigs />} />
 
-                <Route path="/roles/*" element={<AdminRoles />} />
-                <Route path="/roles/:id/edit" element={<EditRoles />} />
-                <Route path="/roles/create" element={<CreateRoles />} />
+                        <Route path="/roles/*" element={<AdminRoles />} />
+                        <Route path="/roles/:id/edit" element={<EditRoles />} />
+                        <Route path="/roles/create" element={<CreateRoles />} />
 
-                <Route path="/" element={<AdminDashboard />} />
+                        <Route path="/*" element={<Navigate to="/admin" />} />
+                    </>
+                )}
+                {!isAuthenticated && (
+                    <Route path="/*" element={<Navigate to="/login" />} />
+                )}
+                
             </Routes>
         </>
     );

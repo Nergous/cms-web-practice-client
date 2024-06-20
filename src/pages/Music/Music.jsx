@@ -30,7 +30,7 @@ const Music = () => {
                     title={music.record_name}
                     key={music.id}
                 >
-                    {music.id} --- {music.record_name} --- {music.type_of_record}
+                    {music.record_name} --- {music.type_of_record}
                 </button>
             ))}
             <Modal visible={modal} setVisible={setModal}>

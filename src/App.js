@@ -2,12 +2,10 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import MyHeader from "./components/header/MyHeader";
 import MyFooter from "./components/footer/MyFooter";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { HashRouter, Routes, Route, BrowserRouter } from "react-router-dom";
 import AppRouter from "./components/AppRouter/AppRouter";
-import CarouselMy from "./components/Carousel/CarouselMy";
+
 import Admin from "./pages/Admin/Admin";
-import { useEffect } from "react";
-import axios from "axios";
 
 function App() {
     return (
@@ -21,7 +19,13 @@ function App() {
                         element={
                             <>
                                 <MyHeader />
-                                <div className="main__part" style={{ background: "black" }}>
+                                <div
+                                    className="main__part"
+                                    style={{
+                                        background: "black",
+                                        minHeight: "100vh",
+                                    }}
+                                >
                                     <AppRouter />
                                 </div>
                                 <MyFooter />

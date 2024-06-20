@@ -1,37 +1,23 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Modal from "../../components/Modal/Modal";
 import Member from "./Member/Member";
 import LazyLoad from "react-lazyload";
 
 const Members = () => {
-    
     const [modal, setModal] = useState(false);
-    let members = [
-        {
-            id: 1,
-            name: "Ярик",
-            text: "Какой то текст от Ярика",
-            img: "iam.jpg",
-        },
-        {
-            id: 2,
-            name: "Даша",
-            text: "Какой то текст от Даши",
-            img: "dasha.jpg",
-        },
-        {
-            id: 3,
-            name: "Лена",
-            text: "Какой то текст от Лены",
-            img: "lena.jpg",
-        },
-        {
-            id: 4,
-            name: "Олег",
-            text: "Какой то текст от Олега",
-            img: "oleg.jpg",
-        },
-    ];
+
+    const [members, setMembers] = useState([]);
+
+    const fetchMembers = async () => {
+        const response = await fetch("http://localhost:3001/members");
+        const data = await response.json();
+        setMembers(data);
+    };
+    
+    useEffect(() => {
+        fetchMembers();
+    }, []);
+
     const [selectedMember, setSelectedMember] = useState(null);
     const [hoveredId, setHoveredId] = useState(null);
 
@@ -50,7 +36,15 @@ const Members = () => {
 
     return (
         <div>
-            <h1 style={{color: "white", display: "block", textAlign: "center"}}>Ето мы</h1>
+            <h1
+                style={{
+                    color: "white",
+                    display: "block",
+                    textAlign: "center",
+                }}
+            >
+                Ето мы
+            </h1>
             <div
                 style={{
                     margin: "0 auto",
@@ -67,15 +61,17 @@ const Members = () => {
                             onClick={() => handleMemberClick(member)}
                             onMouseEnter={() => handleMouseEnter(member.id)}
                             onMouseLeave={handleMouseLeave}
-                            name={member.name}
+                            name={member.name_of_member}
                             key={member.id}
                             style={{
                                 height: "250px",
                                 width: "250px",
                                 margin: "50px",
                                 color:
-                                    hoveredId === member.id ? "white" : "transparent",
-                                backgroundImage: `url(${member.img})`,
+                                    hoveredId === member.id
+                                        ? "white"
+                                        : "transparent",
+                                backgroundImage: `url(${member.path_to_photo})`,
                                 backgroundColor:
                                     hoveredId === member.id
                                         ? "rgba(0, 0, 0, 0.5)"
@@ -85,13 +81,14 @@ const Members = () => {
                                         ? "overlay"
                                         : "normal",
                                 backgroundSize: "cover",
-                                transition: "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
+                                transition:
+                                    "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
                                 border: "none",
                                 cursor: "pointer",
-                                overflow: "hidden"
+                                overflow: "hidden",
                             }}
                         >
-                            {member.name}
+                            {member.name_of_member}
                         </button>
                     </LazyLoad>
                 ))}
