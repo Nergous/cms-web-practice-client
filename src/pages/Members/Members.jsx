@@ -49,7 +49,7 @@ const Members = () => {
                 style={{
                     margin: "0 auto",
                     maxWidth: "75vw",
-                    height: "100vh",
+                    height: "auto",
                     display: "flex",
                     justifyContent: "space-between",
                     alignContent: "center",
@@ -64,7 +64,7 @@ const Members = () => {
                             name={member.name_of_member}
                             key={member.id}
                             style={{
-                                height: "250px",
+                                height: "350px",
                                 width: "250px",
                                 margin: "50px",
                                 color:

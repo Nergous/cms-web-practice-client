@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
+import { Link, Route, Routes } from "react-router-dom";
+import axios from "axios";
+import Button from "react-bootstrap/esm/Button";
 import { AppSidebar, AppFooter, AppHeader } from "../../components";
 import CardsMembers from "../AdminMembers/CardsMembers";
-
-import { Link, Route, Routes } from "react-router-dom";
 import EditMembers from "../AdminMembers/EditMembers";
-import axios from "axios";
-
 
 const AdminMembers = () => {
     const [items, setItems] = useState([]);
@@ -21,8 +20,11 @@ const AdminMembers = () => {
             <AppSidebar />
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
-                <Link to="/admin/members/create"> Создать </Link>
+
                 <div className="body flex-grow-1">
+                    <Button variant="info" style={{ margin: "30px" }}>
+                        <Link to="/admin/members/create" style={{ textDecoration: "none", color: "white" }}> Добавить участника </Link>
+                    </Button>
                     <div
                         style={{
                             display: "flex",
@@ -43,10 +45,7 @@ const AdminMembers = () => {
                 <AppFooter />
             </div>
             <Routes>
-                <Route
-                    path=":id/edit"
-                    element={<EditMembers />}
-                />
+                <Route path=":id/edit" element={<EditMembers />} />
             </Routes>
         </>
     );

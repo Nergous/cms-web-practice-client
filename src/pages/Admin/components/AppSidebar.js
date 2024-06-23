@@ -20,22 +20,22 @@ const AppSidebar = () => {
     const items = [
         { 
             component: CNavLink,
-            name: "Music",
+            name: "Музыкальные релизы",
             to: '/admin/music',
         },
         { 
             component: CNavLink,
-            name: "Members",
+            name: "Участники",
             to: '/admin/members',
         },
         { 
             component: CNavLink,
-            name: "Gigs",
+            name: "Выступления",
             to: '/admin/gigs',
         },
         {
             component: CNavLink,
-            name: "Roles",
+            name: "Роли",
             to: "/admin/roles",
         }
     ]

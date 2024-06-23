@@ -1,108 +1,128 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { CForm, CCol, CFormInput, CButton } from "@coreui/react";
 import axios from "axios";
-
+import { useNavigate } from "react-router-dom";
+import {
+    CForm,
+    CCol,
+    CFormInput,
+    CButton,
+    CFormSelect,
+    CListGroup,
+    CListGroupItem,
+} from "@coreui/react";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
 
-// Компонент для редактирования члена команды
 function EditMembers() {
-    // Получаем идентификатор члена команды из параметров URL
     const { id } = useParams();
-    // Состояния для хранения значений полей формы
     const [name, setName] = useState("");
     const [nickname, setNickname] = useState("");
     const [description, setDescription] = useState("");
     const [dateStart, setDateStart] = useState("");
-    const [dateEnd, setDateEnd] = useState(null);
+    const [dateEnd, setDateEnd] = useState("");
+    const [selectedRoles, setSelectedRoles] = useState([]);
+    const [roles, setRoles] = useState([]);
+    const [selectedRole, setSelectedRole] = useState("");
     const [img, setImg] = useState(null);
     const [validated, setValidated] = useState(false);
+    const navigate = useNavigate();
 
-    // Эффект для получения данных члена команды при монтировании компонента
     useEffect(() => {
         const fetchMember = async () => {
             try {
-                // Отправляем GET-запрос на сервер для получения данных члена команды по идентификатору
                 const response = await axios.get(
                     `http://localhost:3001/members/${id}`
                 );
                 const member = response.data;
-                // Заполняем состояния данными члена команды
                 setName(member.name_of_member);
                 setNickname(member.nickname);
                 setDescription(member.description);
                 setDateStart(member.date_start);
-                if (member.date_end) {
-                    setDateEnd(member.date_end);
-                } else {
-                    setDateEnd("");
-                }
-
+                setDateEnd(member.date_end || "");
                 setImg(member.path_to_photo);
-                // Предполагается, что фотография уже загружена на сервер и в member.path_to_photo содержится путь к ней
-                // Если фотография не загружена, то здесь нужно будет установить состояние img
+
+                const rolesResponse = await axios.get(`http://localhost:3001/member_roles`);
+                const memberRoles = rolesResponse.data
+                    .filter((role) => role.id_member === parseInt(id))
+                    .map((role) => role.id_role.toString());
+                setSelectedRoles(memberRoles);
             } catch (error) {
                 console.error(error);
             }
         };
-        fetchMember();
-    }, [id]); // Зависимость от id, чтобы эффект выполнялся при изменении id
 
-    // Обработчик отправки формы
+        const fetchRoles = async () => {
+            try {
+                const response = await axios.get(
+                    "http://localhost:3001/music_roles"
+                );
+                setRoles(response.data);
+            } catch (error) {
+                console.error("Error fetching roles:", error);
+            }
+        };
+
+        fetchMember();
+        fetchRoles();
+    }, [id]);
+
+    const handleAddRole = () => {
+        if (selectedRole && !selectedRoles.includes(selectedRole)) {
+            setSelectedRoles([...selectedRoles, selectedRole]);
+            setSelectedRole("");
+        }
+    };
+
+    const handleRemoveRole = (roleToRemove) => {
+        setSelectedRoles(selectedRoles.filter((role) => role !== roleToRemove));
+    };
+
     const handleSubmit = async (event) => {
         const form = event.currentTarget;
         event.preventDefault();
 
-        // Валидация формы
         if (form.checkValidity() === false) {
-            event.preventDefault();
             event.stopPropagation();
         }
         setValidated(true);
-        const formData = new FormData();
-        formData.append("name_of_member", name);
-        console.log(name);
-        formData.append("nickname", nickname);
-        console.log(nickname);
-        formData.append("description", description);
-        console.log(description);
-        formData.append("date_start", dateStart);
-        console.log(dateStart);
-        formData.append("date_end", dateEnd);
-        console.log(dateEnd);
-        formData.append("img", img);
-        console.log(img);
 
-        console.log(formData);
+        if (form.checkValidity() !== false) {
+            const formData = new FormData();
+            formData.append("name_of_member", name);
+            formData.append("nickname", nickname);
+            formData.append("description", description);
+            formData.append("date_start", dateStart);
+            formData.append("date_end", dateEnd);
+            formData.append("img", img);
 
-        try {
-            // Отправляем PUT-запрос на сервер для обновления данных члена команды
-            const response = await axios.put(
-                `http://localhost:3001/members/${id}`,
-                formData
-            );
-            console.log("Попал");
-            console.log(response.data);
-        } catch (error) {
-            console.log("Не Попал");
-            console.error(error);
+            selectedRoles.forEach((role) => {
+                formData.append("roles[]", role);
+            });
+
+
+            try {
+                await axios.put(
+                    `http://localhost:3001/members/${id}`,
+                    formData
+                );
+                alert("Член команды успешно обновлен");
+                navigate("/admin/members");
+            } catch (error) {
+                alert("Произошла ошибка при обновлении члена команды");
+            }
         }
     };
 
-    const handleDateEndChange = (e) => {
-        console.log("Date end changed");
-        const value = e.target.value;
-        // Если значение пустая строка, устанавливаем null, иначе устанавливаем значение
-        setDateEnd(value === "" ? "" : value);
-    };
+    const availableRoles = roles.filter(
+        (role) => !selectedRoles.includes(role.id.toString())
+    );
 
-    // Рендер компонентов
     return (
         <>
             <AppSidebar />
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
-                <div className="body flex-grow-1">
+                <div className="body flex-grow-1" style={{ margin: "30px" }}>
                     <CForm
                         className="row g-3 needs-validation"
                         noValidate
@@ -112,7 +132,7 @@ function EditMembers() {
                         <CCol md={4}>
                             <CFormInput
                                 type="text"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё в порядке!"
                                 id="name_of_member"
                                 label="Имя"
                                 placeholder="Имя"
@@ -125,7 +145,7 @@ function EditMembers() {
                             <CFormInput
                                 type="text"
                                 placeholder="Прозвище"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё в порядке!"
                                 id="nickname"
                                 label="Сценическое прозвище (необязательно)"
                                 value={nickname}
@@ -136,7 +156,7 @@ function EditMembers() {
                             <CFormInput
                                 type="text"
                                 placeholder="Описание"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё в порядке!"
                                 id="description"
                                 label="Описание"
                                 required
@@ -148,7 +168,7 @@ function EditMembers() {
                             <CFormInput
                                 type="date"
                                 placeholder="01.01.2001"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё в порядке!"
                                 id="date_start"
                                 label="Дата вступления"
                                 required
@@ -161,25 +181,88 @@ function EditMembers() {
                             <CFormInput
                                 type="date"
                                 placeholder="01.01.2001"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё в порядке!"
                                 id="date_end"
-                                label="Дата окончания"
-                                value={dateEnd || ""}
-                                onChange={handleDateEndChange}
+                                label="Дата окончания (необязательно)"
+                                value={dateEnd}
+                                onChange={(e) => setDateEnd(e.target.value)}
                             />
                         </CCol>
 
-                        <CFormInput
-                            type="file"
-                            id="path_to_photo"
-                            feedbackInvalid="Example invalid form file feedback"
-                            aria-label="file example"
-                            onChange={(e) => setImg(e.target.files[0])}
-                        />
+                        {availableRoles.length > 0 && (
+                            <>
+                                <CCol md={4}>
+                                    <CFormSelect
+                                        id="role"
+                                        label="Роль"
+                                        value={selectedRole}
+                                        onChange={(e) =>
+                                            setSelectedRole(e.target.value)
+                                        }
+                                    >
+                                        <option value="">Выберите роль</option>
+                                        {availableRoles.map((role) => (
+                                            <option
+                                                key={role.id}
+                                                value={role.id}
+                                            >
+                                                {role.role_name}
+                                            </option>
+                                        ))}
+                                    </CFormSelect>
+                                </CCol>
+                                <CCol md={4}>
+                                    <CButton
+                                        color="primary"
+                                        onClick={handleAddRole}
+                                        disabled={!selectedRole}
+                                    >
+                                        Добавить роль
+                                    </CButton>
+                                </CCol>
+                            </>
+                        )}
+
+                        {selectedRoles.length > 0 && (
+                            <CCol md={12}>
+                                <CListGroup>
+                                    {selectedRoles.map((roleId) => {
+                                        const role = roles.find(
+                                            (r) => r.id.toString() === roleId
+                                        );
+                                        return (
+                                            <CListGroupItem key={roleId}>
+                                                {role?.role_name}
+                                                <CButton
+                                                    color="danger"
+                                                    size="sm"
+                                                    className="float-end"
+                                                    onClick={() =>
+                                                        handleRemoveRole(roleId)
+                                                    }
+                                                >
+                                                    Удалить
+                                                </CButton>
+                                            </CListGroupItem>
+                                        );
+                                    })}
+                                </CListGroup>
+                            </CCol>
+                        )}
+
+                        <CCol md={4}>
+                            <CFormInput
+                                type="file"
+                                id="path_to_photo"
+                                feedbackInvalid="Неверный формат файла"
+                                aria-label="file example"
+                                onChange={(e) => setImg(e.target.files[0])}
+                            />
+                        </CCol>
 
                         <CCol xs={12}>
                             <CButton color="primary" type="submit">
-                                Submit form
+                                Обновить
                             </CButton>
                         </CCol>
                     </CForm>

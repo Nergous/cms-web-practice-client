@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { CForm, CCol, CFormInput, CButton } from "@coreui/react";
-import axios from "axios";
-import { AppSidebar, AppHeader, AppFooter } from "../../components";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { CForm, CCol, CFormInput, CButton } from "@coreui/react";
+import { AppSidebar, AppHeader, AppFooter } from "../../components";
 
 function CreateRole() {
     const [roleName, setRoleName] = useState("");
@@ -11,26 +11,26 @@ function CreateRole() {
 
     const handleSubmit = async (event) => {
         const form = event.currentTarget;
+        event.preventDefault();
         if (form.checkValidity() === false) {
-            event.preventDefault();
             event.stopPropagation();
         }
         setValidated(true);
-
-        const data = {
-            role_name: roleName,
-        };
-        try {
-            const response = await axios.post(
-                "http://localhost:3001/music_roles",
-                data
-            );
-
-            
-        } catch (error) {
-            console.error(error);
+        if (form.checkValidity() !== false) {
+            const data = {
+                role_name: roleName,
+            };
+            try {
+                const response = await axios.post(
+                    "http://localhost:3001/music_roles",
+                    data
+                );
+                alert("Роль успешно создана");
+                navigate("/admin/roles");
+            } catch (error) {
+                alert("Произошла ошибка при добавлении роли");
+            }
         }
-
     };
 
     return (
@@ -38,17 +38,16 @@ function CreateRole() {
             <AppSidebar />
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
-                <div className="body flex-grow-1">
+                <div className="body flex-grow-1" style={{ margin: "30px" }}>
                     <CForm
                         className="row g-3 needs-validation"
-                        noValidate
                         validated={validated}
                         onSubmit={handleSubmit}
                     >
                         <CCol md={4}>
                             <CFormInput
                                 type="text"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="roleName"
                                 label="Роль"
                                 placeholder="Название роли"
@@ -58,7 +57,7 @@ function CreateRole() {
                         </CCol>
                         <CCol xs={12}>
                             <CButton color="primary" type="submit">
-                                Submit form
+                                Сохранить
                             </CButton>
                         </CCol>
                     </CForm>

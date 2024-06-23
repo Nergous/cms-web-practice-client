@@ -2,7 +2,6 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 30px;
     width: 800px;
     margin: 0 auto;
 }
@@ -11,4 +10,9 @@
     margin: 30px;
     width: 100%;
     height: 70px;
+    border-radius: 15px;
+}
+
+.music__title {
+    color: white;
 }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { CForm, CFormInput, CCol, CButton, CFormSelect } from "@coreui/react";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const CreateMusic = () => {
     const [recordName, setRecordName] = useState("");
@@ -11,6 +12,8 @@ const CreateMusic = () => {
     const [members, setMembers] = useState([]);
     const [tracks, setTracks] = useState([]);
     const [validated, setValidated] = useState(false);
+
+    const navigate = useNavigate();
 
     const fetchMembers = async () => {
         try {
@@ -110,54 +113,57 @@ const CreateMusic = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        event.stopPropagation();
         const form = event.currentTarget;
 
         if (form.checkValidity() === false) {
-            setValidated(true);
-            return;
+            event.stopPropagation();
         }
 
-        // Prepare form data
-        const formData = new FormData();
-        formData.append("recordName", recordName);
-        formData.append("recordType", recordType);
-        formData.append("cover", cover);
-        formData.append("releaseYear", releaseYear);
-        // Convert tracks to include member IDs and author ID
-        const tracksWithIds = tracks.map((track) => {
-            return {
-                ...track,
-                participants: track.participants.map((participantName) => {
-                    const member = members.find(
-                        (member) => member.name_of_member === participantName
-                    );
-                    return member ? member.id : null;
-                }),
-                author:
-                    members.find(
-                        (member) => member.name_of_member === track.author
-                    )?.id || null,
-                file: track.file,
-            };
-        });
-        formData.append("tracks", JSON.stringify(tracksWithIds));
+        setValidated(true);
 
-        tracksWithIds.forEach((track, index) => {
-            if (track.file) {
-                formData.append(`trackFiles`, track.file);
+        if (form.checkValidity() !== false) {
+            // Prepare form data
+            const formData = new FormData();
+            formData.append("recordName", recordName);
+            formData.append("recordType", recordType);
+            formData.append("cover", cover);
+            formData.append("releaseYear", releaseYear);
+            // Convert tracks to include member IDs and author ID
+            const tracksWithIds = tracks.map((track) => {
+                return {
+                    ...track,
+                    participants: track.participants.map((participantName) => {
+                        const member = members.find(
+                            (member) =>
+                                member.name_of_member === participantName
+                        );
+                        return member ? member.id : null;
+                    }),
+                    author:
+                        members.find(
+                            (member) => member.name_of_member === track.author
+                        )?.id || null,
+                    file: track.file,
+                };
+            });
+            formData.append("tracks", JSON.stringify(tracksWithIds));
+
+            tracksWithIds.forEach((track, index) => {
+                if (track.file) {
+                    formData.append(`trackFiles`, track.file);
+                }
+            });
+
+            try {
+                const response = await axios.post(
+                    "http://localhost:3001/record",
+                    formData
+                );
+                alert("Релиз успешно добавлен");
+                navigate("/admin/music");
+            } catch (error) {
+                alert("Произошла ошибка при добавлении релиза");
             }
-        });
-
-
-        try {
-            const response = await axios.post(
-                "http://localhost:3001/record",
-                formData
-            );
-            console.log("Response:", response.data);
-        } catch (error) {
-            console.error("Error submitting the form", error);
         }
     };
 
@@ -166,7 +172,7 @@ const CreateMusic = () => {
             <AppSidebar />
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
-                <div className="body flex-grow-1">
+                <div className="body flex-grow-1" style={{ margin: "30px" }}>
                     <CForm
                         className="row g-3 needs-validation"
                         validated={validated}
@@ -175,7 +181,7 @@ const CreateMusic = () => {
                         <CCol md={4}>
                             <CFormInput
                                 type="text"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="record_name"
                                 label="Название альбома"
                                 placeholder="Альбом"
@@ -185,7 +191,7 @@ const CreateMusic = () => {
                         </CCol>
                         <CCol md={4}>
                             <CFormSelect
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="record_type"
                                 label="Тип записи"
                                 value={recordType}
@@ -212,7 +218,7 @@ const CreateMusic = () => {
                             <CFormInput
                                 type="date"
                                 placeholder="01.01.2001"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="release_year"
                                 label="Год выпуска"
                                 required
@@ -237,7 +243,7 @@ const CreateMusic = () => {
                                     <CFormInput
                                         type="text"
                                         placeholder="Название трека"
-                                        feedbackValid="Looks good!"
+                                        feedbackValid="Всё хорошо!"
                                         value={track.name}
                                         onChange={(e) =>
                                             handleTrackChange(
@@ -265,7 +271,7 @@ const CreateMusic = () => {
                                 </CCol>
                                 <CCol md={4}>
                                     <CFormSelect
-                                        feedbackValid="Looks good!"
+                                        feedbackValid="Всё хорошо!"
                                         value={track.author}
                                         onChange={(e) =>
                                             handleTrackChange(
@@ -292,7 +298,7 @@ const CreateMusic = () => {
                                 {track.participants.length > 0 && (
                                     <CCol md={12}>
                                         <CFormSelect
-                                            feedbackValid="Looks good!"
+                                            feedbackValid="Всё хорошо!"
                                             value={
                                                 Array.isArray(
                                                     track.participants
@@ -316,7 +322,7 @@ const CreateMusic = () => {
                                 <CCol xs={12}>
                                     <CCol md={4}>
                                         <CFormSelect
-                                            feedbackValid="Looks good!"
+                                            feedbackValid="Всё хорошо!"
                                             value={track.selectedParticipant}
                                             onChange={(e) =>
                                                 handleParticipantChange(
@@ -327,6 +333,7 @@ const CreateMusic = () => {
                                         >
                                             <option value="">
                                                 Выберите участника
+                                                (необязательно)
                                             </option>
                                             {getAvailableMembers(
                                                 trackIndex
@@ -345,6 +352,7 @@ const CreateMusic = () => {
                                     <CButton
                                         color="success"
                                         type="button"
+                                        style={{ marginTop: "20px" }}
                                         onClick={() =>
                                             addParticipant(trackIndex)
                                         }
@@ -359,7 +367,7 @@ const CreateMusic = () => {
                         ))}
                         <CCol xs={12}>
                             <CButton color="primary" type="submit">
-                                Submit form
+                                Сохранить
                             </CButton>
                         </CCol>
                     </CForm>

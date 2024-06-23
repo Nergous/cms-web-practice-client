@@ -1,8 +1,8 @@
-import React, { PureComponent } from "react";
-import Card from "react-bootstrap/Card";
-import Button from "react-bootstrap/Button";
+import React from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Card from "react-bootstrap/Card";
+import Button from "react-bootstrap/Button";
 
 const CardsGigs = ({ item }) => {
     const handleDelete = async () => {
@@ -27,21 +27,24 @@ const CardsGigs = ({ item }) => {
                 <Card.Title>{item.title}</Card.Title>
                 <hr></hr>
                 <Card.Text>
-                    <p>{item.place}</p>
-
+                    Место: {item.place}
+                    Ссылка на соц. сети:{" "}
                     <a href={item.link_to_social}>{item.link_to_social}</a>
                 </Card.Text>
-                <Link to={`/admin/gigs/${item.id}/edit`}>
-                    <Button style={{ marginRight: "10px" }} variant="light">
-                        Edit
+                <div style={{ marginTop: "30px" }}>
+                    <Link to={`/admin/gigs/${item.id}/edit`}>
+                        <Button style={{ marginRight: "10px" }} variant="dark">
+                            Редактировать
+                        </Button>
+                    </Link>
+                    <Button
+                        style={{ marginRight: "10px" }}
+                        variant="danger"
+                        onClick={handleDelete}
+                    >
+                        Удалить
                     </Button>
-                </Link>
-                <Button style={{ marginRight: "10px" }} variant="info">
-                    View
-                </Button>
-                <Button style={{ marginRight: "10px" }} variant="danger" onClick={handleDelete}>
-                    Delete
-                </Button>
+                </div>
             </Card.Body>
         </Card>
     );

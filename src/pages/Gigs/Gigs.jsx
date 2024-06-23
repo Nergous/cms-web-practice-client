@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import cl from "./Gigs.module.css";
+import axios from "axios";
 import Gig from "./GIg/Gig";
 import Modal from "../../components/Modal/Modal";
-import axios from "axios";
+
+import cl from "./Gigs.module.css";
 
 const Gigs = () => {
     const [gigs, setGigs] = useState([]);
@@ -23,18 +24,26 @@ const Gigs = () => {
 
     return (
         <div className={cl.gig__outer}>
-            {gigs.map((gig) => (
-                <button
-                    className={cl.gig__panel}
-                    key={gig.id}
-                    onClick={() => handleGigClick(gig)}
-                >
-                    {gig.title} -- {gig.place}
-                </button>
-            ))}
-            <Modal visible={modal} setVisible={setModal}>
-                <Gig gig={selectedGig} />
-            </Modal>
+            <h1 className={cl.gig__title}>Выступления</h1>
+            {gigs && (
+                <>
+                    {gigs.map((gig) => (
+                        <button
+                            className={cl.gig__panel}
+                            key={gig.id}
+                            onClick={() => handleGigClick(gig)}
+                        >
+                            {gig.title}
+                        </button>
+                    ))}
+                    <Modal visible={modal} setVisible={setModal}>
+                        <Gig gig={selectedGig} />
+                    </Modal>
+                </>
+            )}
+            {!gigs.length && (
+                <h1 className={cl.gig__title}>Пока что нет выступлений</h1>
+            )}
         </div>
     );
 };

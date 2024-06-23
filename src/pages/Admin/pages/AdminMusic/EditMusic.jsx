@@ -133,42 +133,43 @@ const EditMusic = () => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        event.stopPropagation();
         const form = event.currentTarget;
 
         if (form.checkValidity() === false) {
-            setValidated(true);
-            return;
+            event.stopPropagation();
         }
 
-        const formData = new FormData();
-        formData.append("recordName", recordName);
-        formData.append("recordType", recordType);
-        formData.append("cover", cover);
-        formData.append("releaseYear", releaseYear);
+        setValidated(true);
 
-        formData.append("tracks", JSON.stringify(tracks));
+        if (form.checkValidity() !== false) {
+            const formData = new FormData();
+            formData.append("recordName", recordName);
+            formData.append("recordType", recordType);
+            formData.append("cover", cover);
+            formData.append("releaseYear", releaseYear);
 
-        tracks.forEach((track, index) => {
-            if (track.file) {
-                formData.append(`trackFiles`, track.file);
+            formData.append("tracks", JSON.stringify(tracks));
+
+            tracks.forEach((track, index) => {
+                if (track.file) {
+                    formData.append(`trackFiles`, track.file);
+                }
+            });
+
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
             }
-        });
 
-        for (let [key, value] of formData.entries()) {
-            console.log(key, value);
-        }
-
-        try {
-            const response = await axios.put(
-                `http://localhost:3001/record/${id}`,
-                formData
-            );
-            console.log("Response:", response.data);
-            navigate("/admin/music");
-        } catch (error) {
-            console.error("Error updating the form", error);
-            alert("Error updating the form");
+            try {
+                const response = await axios.put(
+                    `http://localhost:3001/record/${id}`,
+                    formData
+                );
+                alert("Релиз успешно обновлен");
+                navigate("/admin/music");
+            } catch (error) {
+                alert("Произошла ошибка при обновлении релиза");
+            }
         }
     };
 
@@ -177,7 +178,7 @@ const EditMusic = () => {
             <AppSidebar />
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
-                <div className="body flex-grow-1">
+                <div className="body flex-grow-1" style={{ margin: "30px" }}>
                     <CForm
                         className="row g-3 needs-validation"
                         validated={validated}
@@ -329,9 +330,6 @@ const EditMusic = () => {
                                                     )
                                                 }
                                             >
-                                                <option value="">
-                                                    Выберите участника
-                                                </option>
                                                 {getAvailableMembers(
                                                     trackIndex
                                                 ).map((member) => (
@@ -347,6 +345,7 @@ const EditMusic = () => {
                                         <CButton
                                             color="success"
                                             type="button"
+                                            style={{ marginTop: "20px" }}
                                             onClick={() =>
                                                 addParticipant(trackIndex)
                                             }
@@ -362,7 +361,7 @@ const EditMusic = () => {
                         ))}
                         <CCol xs={12}>
                             <CButton color="primary" type="submit">
-                                Update form
+                                Обновить
                             </CButton>
                         </CCol>
                     </CForm>

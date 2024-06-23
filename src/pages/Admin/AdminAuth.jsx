@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Button from "react-bootstrap/esm/Button";
+
 
 const Auth = () => {
     const [login, setLogin] = useState("");
@@ -21,27 +23,57 @@ const Auth = () => {
     };
 
     return (
-        <div>
-            <h2>Login</h2>
-            {error && <p>{error}</p>}
+        <div style={{color: "white"}}>
+            <h2 style={{ color: "white", margin: "30px" }}>Войти</h2>
+            {error && <p style={{margin: "30px"}}>{error}</p>}
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Login:</label>
-                    <input
-                        type="text"
-                        value={login}
-                        onChange={(e) => setLogin(e.target.value)}
-                    />
-                </div>
-                <div>
-                    <label>Password:</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                    />
-                </div>
-                <button type="submit">Login</button>
+                <table>
+                    <tbody>
+                        <tr>
+                            <td>
+                                {" "}
+                                <label
+                                    style={{ color: "white", margin: "30px" }}
+                                >
+                                    Логин:
+                                </label>
+                            </td>
+                            <td>
+                                <input
+                                    type="text"
+                                    value={login}
+                                    onChange={(e) => setLogin(e.target.value)}
+                                />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label
+                                    style={{ color: "white", margin: "30px" }}
+                                >
+                                    Пароль:
+                                </label>
+                            </td>
+                            <td>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) =>
+                                        setPassword(e.target.value)
+                                    }
+                                />
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div></div>
+                <Button
+                    variant="light"
+                    type="submit"
+                    style={{ margin: "30px" }}
+                >
+                    Войти
+                </Button>
             </form>
         </div>
     );

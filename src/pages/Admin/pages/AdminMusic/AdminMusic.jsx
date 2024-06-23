@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { AppSidebar, AppFooter, AppHeader } from "../../components";
-import CardsMusic from "./CardsMusic";
 import { Link } from "react-router-dom";
 import axios from "axios";
+import Button from "react-bootstrap/esm/Button";
+import { AppSidebar, AppFooter, AppHeader } from "../../components";
+import CardsMusic from "./CardsMusic";
 
 const AdminMusic = () => {
     const [items, setItems] = useState([]);
@@ -19,7 +20,10 @@ const AdminMusic = () => {
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
                 <div className="body flex-grow-1">
-                    <Link to="/admin/music/create">Создать альбом</Link>
+                    <Button variant="info" style={{margin: "30px"}}>
+                        <Link to="/admin/music/create" style={{textDecoration: "none", color: "white"}}>Создать альбом</Link>
+                    </Button>
+
                     <div
                         style={{
                             display: "flex",

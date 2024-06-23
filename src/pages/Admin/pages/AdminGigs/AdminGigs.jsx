@@ -1,9 +1,9 @@
-import React, { PureComponent } from "react";
-import { AppContent, AppSidebar, AppFooter, AppHeader } from "../../components";
-import CardsGigs from "./CardsGigs";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import Button from "react-bootstrap/esm/Button";
+import { AppSidebar, AppFooter, AppHeader } from "../../components";
+import CardsGigs from "./CardsGigs";
 
 const AdminGigs = () => {
     const [items, setItems] = useState([]);
@@ -27,7 +27,9 @@ const AdminGigs = () => {
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
                 <div className="body flex-grow-1">
-                    <Link to="/admin/gigs/create">Создать выступление</Link>
+                    <Button variant="info" style={{ margin: "30px" }}>
+                    <Link to="/admin/gigs/create" style={{ textDecoration: "none", color: "white" }}>Создать выступление</Link>
+                    </Button>
                     <div
                         style={{
                             display: "flex",

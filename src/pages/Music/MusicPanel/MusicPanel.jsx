@@ -1,8 +1,7 @@
-import React from "react";
-import cl from "./MusicPanel.module.css";
+import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useEffect, useState } from "react";
 import CloseButton from "react-bootstrap/CloseButton";
+import cl from "./MusicPanel.module.css";
 
 const MusicPanel = ({ music }) => {
     const [tracksList, setTracksList] = useState([]);
@@ -13,20 +12,31 @@ const MusicPanel = ({ music }) => {
     const [modalIsOpen, setModalIsOpen] = useState(false);
     const [trackModalIsOpen, setTrackModalIsOpen] = useState(false);
     const [musicAuthors, setMusicAuthors] = useState([]);
+    const [trackAuthors, setTrackAuthors] = useState([]);
 
     useEffect(() => {
-        axios.get("http://localhost:3001/tracks").then((response) => {
-            setTracksList(response.data);
-        });
-        axios.get("http://localhost:3001/tracks_in_record").then((response) => {
-            setAssociationList(response.data);
-        });
-        axios.get("http://localhost:3001/members").then((response) => {
-            setMembers(response.data);
-        });
-        axios.get("http://localhost:3001/music_authors").then((response) => {
-            setMusicAuthors(response.data);
-        });
+        const fetchData = async () => {
+            try {
+                const [
+                    trackResponse,
+                    associationResponse,
+                    memberResponse,
+                    musicAuthorsResponse,
+                ] = await Promise.all([
+                    axios.get("http://localhost:3001/tracks"),
+                    axios.get("http://localhost:3001/tracks_in_record"),
+                    axios.get("http://localhost:3001/members"),
+                    axios.get("http://localhost:3001/music_authors"),
+                ]);
+                setTracksList(trackResponse.data);
+                setAssociationList(associationResponse.data);
+                setMembers(memberResponse.data);
+                setMusicAuthors(musicAuthorsResponse.data);
+            } catch (error) {
+                console.error("Error fetching data: ", error);
+            }
+        };
+        fetchData();
     }, []);
 
     useEffect(() => {
@@ -40,11 +50,28 @@ const MusicPanel = ({ music }) => {
         }
     }, [music, tracksList, associationList]);
 
+    useEffect(() => {
+        if (selectedTrack && musicAuthors.length > 0) {
+            const musicAuthor = getAuthorsForTrack(selectedTrack, musicAuthors);
+            setTrackAuthors(musicAuthor);
+        }
+    }, [selectedTrack, musicAuthors]);
+
+    function getAuthorsForTrack(track, authors) {
+        const trackAuthor = authors
+            .filter((author) => author.id_track === track.id)
+            .map(
+                (author) =>
+                    members.find((m) => m.id === author.id_member)
+                        .name_of_member
+            );
+        return trackAuthor;
+    }
+
     function getTracksForRecord(record, tracks, tracksInRecord) {
         const recordIdList = associationList.filter(
             (association) => association.id_record === music.id
         );
-        console.log(recordIdList);
         const tracksForRecord = recordIdList.map((recordId) => {
             return tracks.find((track) => track.id === recordId.id_track);
         });
@@ -54,30 +81,43 @@ const MusicPanel = ({ music }) => {
     const openModal = () => {
         setModalIsOpen(true);
     };
+
     const closeModal = () => {
         setModalIsOpen(false);
     };
+
     const openTrackModal = (track) => {
         setSelectedTrack(track);
         setTrackModalIsOpen(true);
     };
 
     const closeTrackModal = () => {
-        setSelectedTrack(null);
         setTrackModalIsOpen(false);
+        setTimeout(() => {
+            setSelectedTrack(null);
+        }, 300); // Продолжительность совпадает с временем анимации
     };
 
-    const audioPlayer = document.getElementById("audioPlayer");
-    const playAudio = () => {
-        audioPlayer.play();
-    };
-    const pauseAudio = () => {
-        audioPlayer.pause();
-    };
+    useEffect(() => {
+        const handleOutsideClick = (event) => {
+            if (
+                trackModalIsOpen &&
+                event.target.closest(`.${cl.modalContent}`) === null
+            ) {
+                closeTrackModal();
+            }
+        };
+
+        document.addEventListener("mousedown", handleOutsideClick);
+        return () => {
+            document.removeEventListener("mousedown", handleOutsideClick);
+        };
+    }, [trackModalIsOpen]);
 
     if (!music) {
         return <></>;
     }
+
     return (
         <div>
             <div className={cl.parent}>
@@ -101,8 +141,12 @@ const MusicPanel = ({ music }) => {
                     ))}
                 </div>
             </div>
-            {trackModalIsOpen && (
-                <div className={cl.modal}>
+            {(trackModalIsOpen || selectedTrack !== null) && (
+                <div
+                    className={`${cl.modal} ${
+                        trackModalIsOpen ? cl.active : cl.closing
+                    }`}
+                >
                     <div className={cl.modalContent}>
                         <CloseButton onClick={closeTrackModal} />
                         <h2>{selectedTrack.track_name}</h2>
@@ -117,31 +161,15 @@ const MusicPanel = ({ music }) => {
                                 }
                             </p>
                         )}
-                        {musicAuthors.filter((author) => author.id_track === selectedTrack.id) > 0 && (
-                            <p>
-                                Авторы музыки: {""}
-                                {musicAuthors
-                                    .filter(
-                                        (author) =>
-                                            author.id_track === selectedTrack.id
-                                    )
-                                    .map(
-                                        (author) =>
-                                            members.find(
-                                                (m) => m.id === author.id_member
-                                            )?.name_of_member
-                                    )
-                                    .join(", ")}
-                            </p>
+                        {trackAuthors.length > 0 && (
+                            <p>Авторы музыки: {trackAuthors.join(", ")}</p>
                         )}
-
                         <audio className={cl.audio} controls>
                             <source
-                                src={selectedTrack.path_to_file}
+                                src={selectedTrack?.path_to_file}
                                 type="audio/mpeg"
                             ></source>
                         </audio>
-                        {/* Добавьте другие детали трека по необходимости */}
                     </div>
                 </div>
             )}

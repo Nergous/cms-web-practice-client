@@ -1,7 +1,9 @@
+import React from "react";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import axios from "axios";
 import { Link } from "react-router-dom";
+
 const CardsRoles = ({ item }) => {
     const handleDelete = async () => {
         try {
@@ -24,18 +26,21 @@ const CardsRoles = ({ item }) => {
         >
             <Card.Body>
                 <Card.Title>{item.role_name}</Card.Title>
-                <Link to={`/admin/roles/${item.id}/edit`}>
-                    <Button style={{ marginRight: "10px" }} variant="dark">
-                        Edit
+                <hr />
+                <div style={{ marginTop: "30px" }}>
+                    <Link to={`/admin/roles/${item.id}/edit`}>
+                        <Button style={{ marginRight: "10px" }} variant="dark">
+                            Редактировать
+                        </Button>
+                    </Link>
+                    <Button
+                        style={{ marginRight: "10px" }}
+                        variant="danger"
+                        onClick={handleDelete}
+                    >
+                        Удалить
                     </Button>
-                </Link>
-                <Button
-                    style={{ marginRight: "10px" }}
-                    variant="danger"
-                    onClick={handleDelete}
-                >
-                    Delete
-                </Button>
+                </div>
             </Card.Body>
         </Card>
     );

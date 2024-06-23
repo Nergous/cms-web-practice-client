@@ -23,7 +23,6 @@ function App() {
                                     className="main__part"
                                     style={{
                                         background: "black",
-                                        minHeight: "100vh",
                                     }}
                                 >
                                     <AppRouter />

@@ -1,10 +1,9 @@
-import React, { useState } from "react";
-import cl from "./Music.module.css";
+import React, { useState, useEffect } from "react";
+import axios from "axios";
 import Modal from "../../components/Modal/Modal";
 import MusicPanel from "./MusicPanel/MusicPanel";
 
-import axios from "axios";
-import { useEffect } from "react";
+import cl from "./Music.module.css";
 
 const Music = () => {
     const [musicList, setMusicList] = useState([]);
@@ -23,6 +22,7 @@ const Music = () => {
     };
     return (
         <div className={cl.music__container}>
+            <h1 className={cl.music__title}>Музыка</h1>
             {musicList.map((music) => (
                 <button
                     className={cl.music}

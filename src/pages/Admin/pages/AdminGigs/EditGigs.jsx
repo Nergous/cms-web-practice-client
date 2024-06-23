@@ -1,4 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import { useParams, useNavigate } from "react-router-dom";
 import {
     CForm,
     CCol,
@@ -9,9 +11,6 @@ import {
     CListGroupItem,
 } from "@coreui/react";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
-import { useState } from "react";
-import axios from "axios";
-import { useParams } from "react-router-dom";
 
 const EditGigs = () => {
     const [validated, setValidated] = useState(false);
@@ -23,6 +22,7 @@ const EditGigs = () => {
     const [participants, setParticipants] = useState([]);
     const [selectedParticipantId, setSelectedParticipantId] = useState("");
     const [availableParticipants, setAvailableParticipants] = useState([]);
+    const navigate = useNavigate();
 
     const { id } = useParams();
 
@@ -108,31 +108,34 @@ const EditGigs = () => {
     };
 
     const handleSubmit = (event) => {
+        event.preventDefault();
         const form = event.currentTarget;
         if (form.checkValidity() === false) {
-            event.preventDefault();
             event.stopPropagation();
         }
 
-        const data = {
-            title: title,
-            social_link: socialLink,
-            venue: venue,
-            date: date,
-            status: status,
-            participants: participants,
-        };
-
-        axios
-            .put("http://localhost:3001/gigs/" + id + "", data)
-            .then((response) => {
-                console.log(response.data);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-
         setValidated(true);
+
+        if (form.checkValidity() !== false) {
+            const data = {
+                title: title,
+                social_link: socialLink,
+                venue: venue,
+                date: date,
+                status: status,
+                participants: participants,
+            };
+
+            axios
+                .put("http://localhost:3001/gigs/" + id + "", data)
+                .then((response) => {
+                    alert("Выступление успешно обновлено");
+                    navigate("/admin/gigs");
+                })
+                .catch((error) => {
+                    alert("Произошла ошибка при обновлении выступления");
+                });
+        }
     };
 
     return (
@@ -140,17 +143,16 @@ const EditGigs = () => {
             <AppSidebar />
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
-                <div className="body flex-grow-1">
+                <div className="body flex-grow-1" style={{ margin: "30px" }}>
                     <CForm
                         className="row g-3 needs-validation"
-                        noValidate
                         validated={validated}
                         onSubmit={handleSubmit}
                     >
-                        <CCol md={6}>
+                        <CCol md={4}>
                             <CFormInput
                                 type="text"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="title"
                                 label="Название выступления"
                                 placeholder="Название выступления"
@@ -159,10 +161,10 @@ const EditGigs = () => {
                                 onChange={(e) => setTitle(e.target.value)}
                             />
                         </CCol>
-                        <CCol md={6}>
+                        <CCol md={4}>
                             <CFormInput
                                 type="url"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="socialLink"
                                 label="Ссылка на соц сети"
                                 placeholder="Ссылка на соц сети"
@@ -171,10 +173,10 @@ const EditGigs = () => {
                                 onChange={(e) => setSocialLink(e.target.value)}
                             />
                         </CCol>
-                        <CCol md={6}>
+                        <CCol md={4}>
                             <CFormInput
                                 type="text"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="venue"
                                 label="Место проведения"
                                 placeholder="Место проведения"
@@ -186,7 +188,7 @@ const EditGigs = () => {
                         <CCol md={6}>
                             <CFormInput
                                 type="date"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="date"
                                 label="Дата проведения"
                                 placeholder="01.01.2001"
@@ -197,16 +199,16 @@ const EditGigs = () => {
                         </CCol>
                         <CCol md={6}>
                             <CFormSelect
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="status"
                                 label="Статус"
                                 required
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value)}
                             >
-                                <option value="soon">Soon</option>
-                                <option value="completed">Completed</option>
-                                <option value="canceled">Canceled</option>
+                                <option value="soon">Скоро</option>
+                                <option value="completed">Завершен</option>
+                                <option value="canceled">Отменен</option>
                             </CFormSelect>
                         </CCol>
                         <CCol md={6}>
@@ -215,9 +217,9 @@ const EditGigs = () => {
                                 onChange={(e) =>
                                     setSelectedParticipantId(e.target.value)
                                 }
-                                label="Select Participant"
+                                label="Добавить участника выступления"
                             >
-                                <option value="">Choose...</option>
+                                <option value="">Выбрать участника</option>
                                 {availableParticipants.map((participant) => (
                                     <option
                                         key={participant.id}
@@ -228,13 +230,13 @@ const EditGigs = () => {
                                 ))}
                             </CFormSelect>
                         </CCol>
-                        <CCol md={6}>
+                        <CCol md={12}>
                             <CButton
                                 color="primary"
                                 onClick={handleAddParticipant}
                                 disabled={!availableParticipants.length}
                             >
-                                Add Participant
+                                Добавить участника
                             </CButton>
                         </CCol>
                         <CCol md={12}>
@@ -249,7 +251,7 @@ const EditGigs = () => {
 
                         <CCol xs={12}>
                             <CButton color="primary" type="submit">
-                                Submit form
+                                Обновить
                             </CButton>
                         </CCol>
                     </CForm>

@@ -4,11 +4,11 @@ import axios from "axios";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
 import { useNavigate, useParams } from "react-router-dom";
 
-function EditRole(itemId) {
+function EditRole() {
     const [roleName, setRoleName] = useState("");
     const [validated, setValidated] = useState(false);
-    const navigate = useNavigate();
     const { id } = useParams();
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchData = async () => {
@@ -27,22 +27,26 @@ function EditRole(itemId) {
 
     const handleSubmit = async (event) => {
         const form = event.currentTarget;
+        event.preventDefault();
         if (form.checkValidity() === false) {
-            event.preventDefault();
             event.stopPropagation();
         }
         setValidated(true);
 
-        const data = {
-            role_name: roleName,
-        };
-        try {
-            const response = await axios.put(
-                `http://localhost:3001/music_roles/${id}`,
-                data
-            );
-        } catch (error) {
-            console.error(error);
+        if (form.checkValidity() !== false) {
+            const data = {
+                role_name: roleName,
+            };
+            try {
+                const response = await axios.put(
+                    `http://localhost:3001/music_roles/${id}`,
+                    data
+                );
+                navigate("/admin/roles");
+                alert("Роль успешно обновлена");
+            } catch (error) {
+                alert("Произошла ошибка при обновлении роли");
+            }
         }
     };
 
@@ -51,17 +55,16 @@ function EditRole(itemId) {
             <AppSidebar />
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
-                <div className="body flex-grow-1">
+                <div className="body flex-grow-1" style={{ margin: "30px" }}>
                     <CForm
                         className="row g-3 needs-validation"
-                        noValidate
                         validated={validated}
                         onSubmit={handleSubmit}
                     >
                         <CCol md={4}>
                             <CFormInput
                                 type="text"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="roleName"
                                 label="Роль"
                                 value={roleName}
@@ -72,7 +75,7 @@ function EditRole(itemId) {
                         </CCol>
                         <CCol xs={12}>
                             <CButton color="primary" type="submit">
-                                Update
+                                Обновить
                             </CButton>
                         </CCol>
                     </CForm>

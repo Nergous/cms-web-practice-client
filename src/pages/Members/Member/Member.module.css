@@ -15,6 +15,7 @@
 
 .data_right {
     padding-left: 20px;
+    font-size: 21px;
 }
 .data_left {
     padding-right: 20px;
@@ -24,7 +25,7 @@
     color: black;
     font-size: 60px;
     font-style: italic;
-    font-weight: 500;
+    font-weight: 700;
     padding-bottom: 30px;
 }
 

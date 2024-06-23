@@ -1,4 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
     CForm,
     CCol,
@@ -9,8 +11,6 @@ import {
     CListGroupItem,
 } from "@coreui/react";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
-import { useState } from "react";
-import axios from "axios";
 
 const CreateGigs = () => {
     const [validated, setValidated] = useState(false);
@@ -22,6 +22,7 @@ const CreateGigs = () => {
     const [participants, setParticipants] = useState([]);
     const [selectedParticipantId, setSelectedParticipantId] = useState("");
     const [availableParticipants, setAvailableParticipants] = useState([]);
+    const navigate = useNavigate();
 
     const getMembers = () => {
         axios
@@ -54,31 +55,33 @@ const CreateGigs = () => {
     };
 
     const handleSubmit = (event) => {
+        event.preventDefault();
         const form = event.currentTarget;
         if (form.checkValidity() === false) {
-            event.preventDefault();
             event.stopPropagation();
         }
+        setValidated(false);
 
-        const data = {
-            title: title,
-            social_link: socialLink,
-            venue: venue,
-            date: date,
-            status: status,
-            participants: participants,
-        };
+        if (form.checkValidity() !== false) {
+            const data = {
+                title: title,
+                social_link: socialLink,
+                venue: venue,
+                date: date,
+                status: status,
+                participants: participants,
+            };
 
-        axios
-            .post("http://localhost:3001/gigs", data)
-            .then((response) => {
-                console.log(response.data);
-            })
-            .catch((error) => {
-                console.error(error);
-            });
-
-        setValidated(true);
+            axios
+                .post("http://localhost:3001/gigs", data)
+                .then((response) => {
+                    alert("Выступление успешно добавлено");
+                    navigate("/admin/gigs");
+                })
+                .catch((error) => {
+                    alert("Произошла ошибка при добавлении выступления");
+                });
+        }
     };
 
     return (
@@ -86,17 +89,16 @@ const CreateGigs = () => {
             <AppSidebar />
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
-                <div className="body flex-grow-1">
+                <div className="body flex-grow-1" style={{ margin: "30px" }}>
                     <CForm
                         className="row g-3 needs-validation"
-                        noValidate
                         validated={validated}
                         onSubmit={handleSubmit}
                     >
-                        <CCol md={6}>
+                        <CCol md={4}>
                             <CFormInput
                                 type="text"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="title"
                                 label="Название выступления"
                                 placeholder="Название выступления"
@@ -104,10 +106,10 @@ const CreateGigs = () => {
                                 onChange={(e) => setTitle(e.target.value)}
                             />
                         </CCol>
-                        <CCol md={6}>
+                        <CCol md={4}>
                             <CFormInput
                                 type="url"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="socialLink"
                                 label="Ссылка на соц сети"
                                 placeholder="Ссылка на соц сети"
@@ -115,10 +117,10 @@ const CreateGigs = () => {
                                 onChange={(e) => setSocialLink(e.target.value)}
                             />
                         </CCol>
-                        <CCol md={6}>
+                        <CCol md={4}>
                             <CFormInput
                                 type="text"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="venue"
                                 label="Место проведения"
                                 placeholder="Место проведения"
@@ -129,7 +131,7 @@ const CreateGigs = () => {
                         <CCol md={6}>
                             <CFormInput
                                 type="date"
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="date"
                                 label="Дата проведения"
                                 placeholder="01.01.2001"
@@ -139,16 +141,16 @@ const CreateGigs = () => {
                         </CCol>
                         <CCol md={6}>
                             <CFormSelect
-                                feedbackValid="Looks good!"
+                                feedbackValid="Всё хорошо!"
                                 id="status"
                                 label="Статус"
                                 required
                                 value={status}
                                 onChange={(e) => setStatus(e.target.value)}
                             >
-                                <option value="soon">Soon</option>
-                                <option value="completed">Completed</option>
-                                <option value="canceled">Canceled</option>
+                                <option value="soon">Скоро</option>
+                                <option value="completed">Завершен</option>
+                                <option value="canceled">Отменен</option>
                             </CFormSelect>
                         </CCol>
                         <CCol md={6}>
@@ -157,9 +159,9 @@ const CreateGigs = () => {
                                 onChange={(e) =>
                                     setSelectedParticipantId(e.target.value)
                                 }
-                                label="Select Participant"
+                                label="Добавить участника выступления (необязательно)"
                             >
-                                <option value="">Choose...</option>
+                                <option value="">Выбрать участника</option>
                                 {availableParticipants.map((participant) => (
                                     <option
                                         key={participant.id}
@@ -170,13 +172,14 @@ const CreateGigs = () => {
                                 ))}
                             </CFormSelect>
                         </CCol>
-                        <CCol md={6}>
+                        <CCol md={12}>
                             <CButton
+                                
                                 color="primary"
                                 onClick={handleAddParticipant}
                                 disabled={!availableParticipants.length}
                             >
-                                Add Participant
+                                Добавить участника
                             </CButton>
                         </CCol>
                         <CCol md={12}>
@@ -191,7 +194,7 @@ const CreateGigs = () => {
 
                         <CCol xs={12}>
                             <CButton color="primary" type="submit">
-                                Submit form
+                                Сохранить
                             </CButton>
                         </CCol>
                     </CForm>

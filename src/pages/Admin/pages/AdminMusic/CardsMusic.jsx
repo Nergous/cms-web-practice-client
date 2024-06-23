@@ -1,3 +1,4 @@
+import React from "react";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import CardBody from "react-bootstrap/esm/CardBody";
@@ -27,25 +28,28 @@ const CardsMusic = ({ item }) => {
         >
             <Card.Body>
                 <Card.Title>{item.record_name}</Card.Title>
-                <CardBody>{item.year_of_publish}</CardBody>
-                <CardBody>{item.type_of_record}</CardBody>
+                <hr />
+                <CardBody>Дата выпуска: {item.year_of_publish}</CardBody>
+                <CardBody>Тип релиза: {item.type_of_record}</CardBody>
                 <CardImg
                     src={item.path_to_cover}
                     alt="Card image cap"
                     style={{ width: "250px" }}
                 />
-                <Link to={`/admin/music/${item.id}/edit`}>
-                    <Button style={{ marginRight: "10px" }} variant="dark">
-                        Edit
+                <div style={{marginTop: "30px"}}>
+                    <Link to={`/admin/music/${item.id}/edit`}>
+                        <Button style={{ marginRight: "10px" }} variant="dark">
+                            Редактировать
+                        </Button>
+                    </Link>
+                    <Button
+                        style={{ marginRight: "10px" }}
+                        variant="danger"
+                        onClick={handleDelete}
+                    >
+                        Удалить
                     </Button>
-                </Link>
-                <Button
-                    style={{ marginRight: "10px" }}
-                    variant="danger"
-                    onClick={handleDelete}
-                >
-                    Delete
-                </Button>
+                </div>
             </Card.Body>
         </Card>
     );

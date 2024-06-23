@@ -1,9 +1,9 @@
-import React, { PureComponent } from "react";
+import React, { useEffect, useState } from "react";
 import { AppSidebar, AppFooter, AppHeader } from "../../components";
 import CardsRoles from "./CardsRoles";
 import { Link } from "react-router-dom";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import Button from "react-bootstrap/esm/Button";
 
 const AdminRoles = () => {
     const [items, setItems] = useState([]);
@@ -20,7 +20,14 @@ const AdminRoles = () => {
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
                 <div className="body flex-grow-1">
-                    <Link to="/admin/roles/create">Создать роль</Link>
+                    <Button variant="info" style={{ margin: "30px" }}>
+                        <Link
+                            to="/admin/roles/create"
+                            style={{ textDecoration: "none", color: "white" }}
+                        >
+                            Создать роль
+                        </Link>
+                    </Button>
                     <div
                         style={{
                             display: "flex",
