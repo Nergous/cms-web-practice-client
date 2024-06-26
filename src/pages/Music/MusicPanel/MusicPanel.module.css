@@ -31,13 +31,28 @@
 }
 
 .tracks {
-    color: white;
+    color: black;
     min-width: 400px;
     margin: 5px;
-    background-color: grey;
+    background: rgb(255, 255, 255);
+    border-style: solid;
+    border-color: black;
+    border-width: 1px;
     border-radius: 15px;
     font-size: 30px;
     text-align: center;
+    transition: transform 0.3s ease;
+    cursor: pointer;
+    pointer-events: all;
+}
+
+.tracks:hover {
+    transform: scale(1.05);
+}
+
+.tracks>p {
+    margin-top: 10px;
+    margin-bottom: 10px;
 }
 
 .audio {

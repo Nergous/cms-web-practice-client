@@ -9,6 +9,7 @@ import {
     CFormSelect,
     CListGroup,
     CListGroupItem,
+    CFormLabel,
 } from "@coreui/react";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
 
@@ -22,6 +23,7 @@ const CreateGigs = () => {
     const [participants, setParticipants] = useState([]);
     const [selectedParticipantId, setSelectedParticipantId] = useState("");
     const [availableParticipants, setAvailableParticipants] = useState([]);
+    const [poster, setPoster] = useState(null);
     const navigate = useNavigate();
 
     const getMembers = () => {
@@ -63,17 +65,23 @@ const CreateGigs = () => {
         setValidated(false);
 
         if (form.checkValidity() !== false) {
-            const data = {
-                title: title,
-                social_link: socialLink,
-                venue: venue,
-                date: date,
-                status: status,
-                participants: participants,
-            };
+            const formData = new FormData();
+            formData.append("title", title);
+            formData.append("social_link", socialLink);
+            formData.append("venue", venue);
+            formData.append("date", date);
+            formData.append("status", status);
+            participants.forEach((participant, index) => {
+                formData.append(`participants[${index}][id]`, participant.id);
+            });
+            formData.append("poster", poster);
 
             axios
-                .post("http://localhost:3001/gigs", data)
+                .post("http://localhost:3001/gigs", formData, {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                    },
+                })
                 .then((response) => {
                     alert("Выступление успешно добавлено");
                     navigate("/admin/gigs");
@@ -174,7 +182,6 @@ const CreateGigs = () => {
                         </CCol>
                         <CCol md={12}>
                             <CButton
-                                
                                 color="primary"
                                 onClick={handleAddParticipant}
                                 disabled={!availableParticipants.length}
@@ -191,7 +198,16 @@ const CreateGigs = () => {
                                 ))}
                             </CListGroup>
                         </CCol>
-
+                        <CCol md={12}>
+                            <CFormLabel htmlFor="poster">Афиша</CFormLabel>
+                            <CFormInput
+                                id="poster"
+                                required
+                                type="file"
+                                onChange={(e) => setPoster(e.target.files[0])}
+                                
+                            />
+                        </CCol>
                         <CCol xs={12}>
                             <CButton color="primary" type="submit">
                                 Сохранить

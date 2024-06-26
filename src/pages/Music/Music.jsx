@@ -23,19 +23,26 @@ const Music = () => {
     return (
         <div className={cl.music__container}>
             <h1 className={cl.music__title}>Музыка</h1>
-            {musicList.map((music) => (
-                <button
-                    className={cl.music}
-                    onClick={() => handleMusicClick(music)}
-                    title={music.record_name}
-                    key={music.id}
-                >
-                    {music.record_name} --- {music.type_of_record}
-                </button>
-            ))}
-            <Modal visible={modal} setVisible={setModal}>
-                <MusicPanel music={selectedMusic} />
-            </Modal>
+            {musicList.length > 0 && (
+                <>
+                    {musicList.map((music) => (
+                        <button
+                            className={cl.music}
+                            onClick={() => handleMusicClick(music)}
+                            title={music.record_name}
+                            key={music.id}
+                        >
+                            {music.record_name}
+                        </button>
+                    ))}
+                    <Modal visible={modal} setVisible={setModal}>
+                        <MusicPanel music={selectedMusic} />
+                    </Modal>
+                </>
+            )}
+            {musicList.length === 0 && (
+                <h2 className={cl.music__title}>Пока что здесь ничего нет</h2>
+            )}
         </div>
     );
 };

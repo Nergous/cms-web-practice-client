@@ -9,6 +9,7 @@ import {
     CFormSelect,
     CListGroup,
     CListGroupItem,
+    CFormCheck,
 } from "@coreui/react";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
 
@@ -23,6 +24,7 @@ function CreateMembers() {
     const [selectedRole, setSelectedRole] = useState("");
     const [img, setImg] = useState(null);
     const [validated, setValidated] = useState(false);
+    const [isNotMember, setIsNotMember] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -60,24 +62,45 @@ function CreateMembers() {
         setValidated(true);
 
         if (form.checkValidity() !== false) {
-            const formData = new FormData();
-            formData.append("name_of_member", name);
-            formData.append("nickname", nickname);
-            formData.append("description", description);
-            formData.append("date_start", dateStart);
-            formData.append("date_end", dateEnd);
-            formData.append("img", img);
+            if (isNotMember) {
+                const data = {
+                    name_of_member: name,
+                    nickname: "no nickname",
+                    description: description,
+                    date_start: "1999-01-01",
+                    date_end: "1999-01-02",
+                    img: "no img",
+                    is_member: 0,
+                };
 
-            selectedRoles.forEach((role) => {
-                formData.append("roles[]", role);
-            });
+                try {
+                    await axios.post("http://localhost:3001/members", data);
+                    alert("Участник успешно добавлен");
+                    navigate("/admin/members");
+                } catch (error) {
+                    alert("Произошла ошибка при добавлении участника");
+                }
+            } else {
+                const formData = new FormData();
+                formData.append("name_of_member", name);
+                formData.append("nickname", nickname);
+                formData.append("description", description);
+                formData.append("date_start", dateStart);
+                formData.append("date_end", dateEnd);
+                formData.append("is_member", 1);
+                formData.append("img", img);
 
-            try {
-                await axios.post("http://localhost:3001/members", formData);
-                alert("Участник успешно добавлен");
-                navigate("/admin/members");
-            } catch (error) {
-                alert("Произошла ошибка при добавлении участника");
+                selectedRoles.forEach((role) => {
+                    formData.append("roles[]", role);
+                });
+
+                try {
+                    await axios.post("http://localhost:3001/members", formData);
+                    alert("Участник успешно добавлен");
+                    navigate("/admin/members");
+                } catch (error) {
+                    alert("Произошла ошибка при добавлении участника");
+                }
             }
         }
     };
@@ -108,126 +131,189 @@ function CreateMembers() {
                                 onChange={(e) => setName(e.target.value)}
                             />
                         </CCol>
-                        <CCol md={4}>
-                            <CFormInput
-                                type="text"
-                                placeholder="Прозвище"
-                                feedbackValid="Всё в порядке!"
-                                id="nickname"
-                                label="Сценическое прозвище (необязательно)"
-                                onChange={(e) => setNickname(e.target.value)}
-                            />
-                        </CCol>
-                        <CCol md={6}>
-                            <CFormInput
-                                type="text"
-                                placeholder="Описание"
-                                feedbackValid="Всё в порядке!"
-                                id="description"
-                                label="Описание"
-                                required
-                                onChange={(e) => setDescription(e.target.value)}
-                            />
-                        </CCol>
-                        <CCol md={4}>
-                            <CFormInput
-                                type="date"
-                                placeholder="01.01.2001"
-                                feedbackValid="Всё в порядке!"
-                                id="date_start"
-                                label="Дата вступления"
-                                required
-                                onChange={(e) => setDateStart(e.target.value)}
-                            />
-                        </CCol>
-                        <CCol md={4}>
-                            <CFormInput
-                                type="date"
-                                placeholder="01.01.2001"
-                                feedbackValid="Всё в порядке!"
-                                id="date_end"
-                                label="Дата окончания (необязательно)"
-                                onChange={(e) => setDateEnd(e.target.value)}
-                            />
-                        </CCol>
-                        {availableRoles.length > 0 && (
-                            <>
-                                <CCol md={4}>
-                                    <CFormSelect
-                                        id="role"
-                                        label="Роль"
-                                        required={selectedRoles.length === 0}
-                                        value={selectedRole}
-                                        onChange={(e) =>
-                                            setSelectedRole(e.target.value)
-                                        }
-                                    >
-                                        <option value="">Выберите роль</option>
-                                        {availableRoles.map((role) => (
-                                            <option
-                                                key={role.id}
-                                                value={role.id}
-                                            >
-                                                {role.role_name}
-                                            </option>
-                                        ))}
-                                    </CFormSelect>
-                                </CCol>
-                                <CCol md={4}>
-                                    <CButton
-                                        color="primary"
-                                        onClick={handleAddRole}
-                                        disabled={!selectedRole}
-                                    >
-                                        Добавить роль
-                                    </CButton>
-                                </CCol>
-                            </>
+                        {isNotMember && (
+                            <CCol md={6}>
+                                <CFormInput
+                                    type="text"
+                                    placeholder="Ссылка на человека (группу)"
+                                    feedbackValid="Всё в порядке!"
+                                    id="description"
+                                    label="Ссылка на человека (группу)"
+                                    required
+                                    onChange={(e) =>
+                                        setDescription(e.target.value)
+                                    }
+                                />
+                            </CCol>
                         )}
-
-                        {selectedRoles.length > 0 && (
-                            <CCol md={12}>
-                                <CListGroup>
-                                    {selectedRoles.map((roleId) => {
-                                        const role = roles.find(
-                                            (r) => r.id.toString() === roleId
-                                        );
-                                        return (
-                                            <CListGroupItem key={roleId}>
-                                                {role?.role_name}
-                                                <CButton
-                                                    color="danger"
-                                                    size="sm"
-                                                    className="float-end"
-                                                    onClick={() =>
-                                                        handleRemoveRole(roleId)
-                                                    }
-                                                >
-                                                    Удалить
-                                                </CButton>
-                                            </CListGroupItem>
-                                        );
-                                    })}
-                                </CListGroup>
+                        {!isNotMember && (
+                            <CCol md={6}>
+                                <CFormInput
+                                    type="text"
+                                    placeholder="Описание"
+                                    feedbackValid="Всё в порядке!"
+                                    id="description"
+                                    label="Описание"
+                                    required
+                                    onChange={(e) =>
+                                        setDescription(e.target.value)
+                                    }
+                                />
                             </CCol>
                         )}
 
                         <CCol md={4}>
-                            <CFormInput
-                                type="file"
-                                id="img"
-                                feedbackInvalid="Неверный формат файла"
-                                aria-label="file example"
-                                required
-                                onChange={(e) => setImg(e.target.files[0])}
+                            <CFormCheck
+                                type="checkbox"
+                                id="isNotMember"
+                                label="Не является участником"
+                                checked={isNotMember}
+                                onChange={(e) =>
+                                    setIsNotMember(e.target.checked)
+                                }
                             />
                         </CCol>
+                        {!isNotMember && (
+                            <>
+                                <CCol md={4}>
+                                    <CFormInput
+                                        type="text"
+                                        placeholder="Прозвище"
+                                        feedbackValid="Всё в порядке!"
+                                        id="nickname"
+                                        label="Сценическое прозвище (необязательно)"
+                                        onChange={(e) =>
+                                            setNickname(e.target.value)
+                                        }
+                                    />
+                                </CCol>
+                                <CCol md={4}>
+                                    <CFormInput
+                                        type="date"
+                                        placeholder="01.01.2001"
+                                        feedbackValid="Всё в порядке!"
+                                        id="date_start"
+                                        label="Дата вступления"
+                                        required
+                                        onChange={(e) =>
+                                            setDateStart(e.target.value)
+                                        }
+                                    />
+                                </CCol>
+                                <CCol md={4}>
+                                    <CFormInput
+                                        type="date"
+                                        placeholder="01.01.2001"
+                                        feedbackValid="Всё в порядке!"
+                                        id="date_end"
+                                        label="Дата окончания (необязательно)"
+                                        onChange={(e) =>
+                                            setDateEnd(e.target.value)
+                                        }
+                                    />
+                                </CCol>
+                                {availableRoles.length > 0 && (
+                                    <>
+                                        <CCol md={4}>
+                                            <CFormSelect
+                                                id="role"
+                                                label="Роль"
+                                                required={
+                                                    selectedRoles.length === 0
+                                                }
+                                                value={selectedRole}
+                                                onChange={(e) =>
+                                                    setSelectedRole(
+                                                        e.target.value
+                                                    )
+                                                }
+                                            >
+                                                <option value="">
+                                                    Выберите роль
+                                                </option>
+                                                {availableRoles.map((role) => (
+                                                    <option
+                                                        key={role.id}
+                                                        value={role.id}
+                                                    >
+                                                        {role.role_name}
+                                                    </option>
+                                                ))}
+                                            </CFormSelect>
+                                        </CCol>
+                                        <CCol md={4}>
+                                            <CButton
+                                                color="primary"
+                                                onClick={handleAddRole}
+                                                disabled={!selectedRole}
+                                            >
+                                                Добавить роль
+                                            </CButton>
+                                        </CCol>
+                                    </>
+                                )}
+                                {selectedRoles.length > 0 && (
+                                    <CCol md={12}>
+                                        <CListGroup>
+                                            {selectedRoles.map((roleId) => {
+                                                const role = roles.find(
+                                                    (r) =>
+                                                        r.id.toString() ===
+                                                        roleId
+                                                );
+                                                return (
+                                                    <CListGroupItem
+                                                        key={roleId}
+                                                    >
+                                                        {role?.role_name}
+                                                        <CButton
+                                                            color="danger"
+                                                            size="sm"
+                                                            className="float-end"
+                                                            onClick={() =>
+                                                                handleRemoveRole(
+                                                                    roleId
+                                                                )
+                                                            }
+                                                        >
+                                                            Удалить
+                                                        </CButton>
+                                                    </CListGroupItem>
+                                                );
+                                            })}
+                                        </CListGroup>
+                                    </CCol>
+                                )}
 
-                        <CCol xs={12}>
-                            <CButton color="primary" type="submit">
-                                Сохранить
-                            </CButton>
-                        </CCol>
+                                <CCol md={4}>
+                                    <CFormInput
+                                        type="file"
+                                        id="img"
+                                        feedbackInvalid="Неверный формат файла"
+                                        aria-label="file example"
+                                        required
+                                        onChange={(e) =>
+                                            setImg(e.target.files[0])
+                                        }
+                                    />
+                                </CCol>
+                            </>
+                        )}
+
+                        {((selectedRoles.length > 0) || (isNotMember === true)) && (
+                            <CCol xs={12}>
+                                <CButton color="primary" type="submit">
+                                    Сохранить
+                                </CButton>
+                            </CCol>
+                        )}
+                        {availableRoles.length === 0 && selectedRoles.length === 0 && (
+                            <CCol xs={12}>
+                                <p className="text-danger">
+                                    Нет доступных ролей
+                                </p>
+                            </CCol>
+                        )}
                     </CForm>
                 </div>
                 <AppFooter />

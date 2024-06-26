@@ -25,7 +25,6 @@ const DefaultLayout = React.lazy(() => import("./layout/DefaultLayout"));
 
 const Admin = () => {
     const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
-    console.log(isAuthenticated);
     return (
         <>
             <Routes>

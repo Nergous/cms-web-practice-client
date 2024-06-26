@@ -33,7 +33,7 @@ const EditMusic = () => {
             setRecordName(recordData.record_name || "");
             setRecordType(recordData.type_of_record || "");
             setReleaseYear(recordData.year_of_publish || "");
-            setTracks(recordData.tracks || "");
+            setTracks(recordData.tracks || []);
             setCover(recordData.path_to_cover || "");
         } catch (error) {
             console.error(error);
@@ -73,6 +73,7 @@ const EditMusic = () => {
     };
 
     const addParticipant = (index) => {
+        console.log(index);
         const newTracks = [...tracks];
         const { selectedParticipant } = newTracks[index];
         if (
@@ -86,10 +87,15 @@ const EditMusic = () => {
             );
 
             newTracks[index].members.push(participant);
-            console.log(newTracks[index].members);
             newTracks[index].selectedParticipant = "";
             setTracks(newTracks);
         }
+    };
+
+    const removeParticipant = (trackIndex, participantIndex) => {
+        const newTracks = [...tracks];
+        newTracks[trackIndex].members.splice(participantIndex, 1);
+        setTracks(newTracks);
     };
 
     const handleParticipantChange = (trackIndex, value) => {
@@ -299,19 +305,27 @@ const EditMusic = () => {
                                 </CCol>
                                 {track.members.length > 0 && (
                                     <CCol md={12}>
-                                        <CFormSelect
-                                            feedbackValid="Looks good!"
-                                            readOnly
-                                            multiple
-                                        >
+                                        <div>
                                             {track.members.map(
-                                                (member, index) => (
-                                                    <option key={index}>
+                                                (member, participantIndex) => (
+                                                    <div key={participantIndex}>
                                                         {member.name_of_member}
-                                                    </option>
+                                                        <CButton
+                                                            color="danger"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                removeParticipant(
+                                                                    trackIndex,
+                                                                    participantIndex
+                                                                )
+                                                            }
+                                                        >
+                                                            Удалить
+                                                        </CButton>
+                                                    </div>
                                                 )
                                             )}
-                                        </CFormSelect>
+                                        </div>
                                     </CCol>
                                 )}
                                 {getAvailableMembers(trackIndex).length > 0 && (
@@ -330,6 +344,10 @@ const EditMusic = () => {
                                                     )
                                                 }
                                             >
+                                                <option value="">
+                                                    Выберите участника
+                                                    (необязательно)
+                                                </option>
                                                 {getAvailableMembers(
                                                     trackIndex
                                                 ).map((member) => (

@@ -63,7 +63,6 @@ const MusicPanel = ({ music }) => {
             .map(
                 (author) =>
                     members.find((m) => m.id === author.id_member)
-                        .name_of_member
             );
         return trackAuthor;
     }
@@ -114,6 +113,16 @@ const MusicPanel = ({ music }) => {
         };
     }, [trackModalIsOpen]);
 
+    const renderMember = (member) => {
+        if (member.is_member) {
+            return member.name_of_member;
+        } else {
+            return (
+                <a href={`${member.description}`}>{member.name_of_member}</a>
+            );
+        }
+    };
+
     if (!music) {
         return <></>;
     }
@@ -153,16 +162,26 @@ const MusicPanel = ({ music }) => {
                         {selectedTrack.lyrics_author && (
                             <p>
                                 Автор слов:{" "}
-                                {
+                                {renderMember(
                                     members.find(
                                         (m) =>
                                             m.id === selectedTrack.lyrics_author
-                                    ).name_of_member
-                                }
+                                    )
+                                )}
                             </p>
                         )}
                         {trackAuthors.length > 0 && (
-                            <p>Авторы музыки: {trackAuthors.join(", ")}</p>
+                            <p>
+                                Авторы музыки:{" "}
+                                {trackAuthors.map((author, index) => (
+                                    <span key={index}>
+                                        {renderMember(author)}
+                                        {index < trackAuthors.length - 1
+                                            ? ", "
+                                            : ""}
+                                    </span>
+                                ))}
+                            </p>
                         )}
                         <audio className={cl.audio} controls>
                             <source

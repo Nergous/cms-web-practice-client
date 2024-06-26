@@ -68,6 +68,7 @@ const Member = ({ member }) => {
                             <img
                                 className={cl.member__img}
                                 src={member.path_to_photo}
+                                alt={member.name_of_member}
                             ></img>
                         </td>
                         <td className={cl.data_right}>

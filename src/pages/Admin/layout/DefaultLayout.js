@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { AppSidebar, AppFooter, AppHeader } from "../components/index";
+import { useNavigate } from "react-router-dom";
 
 import { CForm, CFormInput, CButton, CImage } from "@coreui/react";
 
@@ -8,7 +9,10 @@ const DefaultLayout = () => {
     const [text, setText] = useState("");
     const [files, setFiles] = useState(null);
     const [images, setImages] = useState([]);
+    const [login, setLogin] = useState("");
+    const [password, setPassword] = useState("");
     const textAreaRef = useRef(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadText = async () => {
@@ -98,6 +102,19 @@ const DefaultLayout = () => {
         }
     };
 
+    const handleUpdateCredentials = async () => {
+        try {
+            await axios.post("http://localhost:3001/admin/update_credentials", {
+                login,
+                password,
+            });
+            alert("Логин и пароль успешно обновлены");
+            navigate("/admin");
+        } catch (error) {
+            alert("Произошла ошибка при обновлении логина и пароля");
+        }
+    };
+
     return (
         <div>
             <AppSidebar />
@@ -121,7 +138,6 @@ const DefaultLayout = () => {
                     <CButton color="primary" onClick={handleSave}>
                         Сохранить
                     </CButton>
-
                     <CForm style={{ margin: "30px 0" }}>
                         <CFormInput
                             type="file"
@@ -161,6 +177,29 @@ const DefaultLayout = () => {
                                 </CButton>
                             </div>
                         ))}
+                    </div>
+                    <div>
+                        <h3>Изменить логин и пароль</h3>
+                        <CForm style={{ margin: "30px 0" }}>
+                            <CFormInput
+                                type="text"
+                                placeholder="Новый логин"
+                                value={login}
+                                onChange={(e) => setLogin(e.target.value)}
+                            />
+                            <CFormInput
+                                type="password"
+                                placeholder="Новый пароль"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </CForm>
+                        <CButton
+                            color="primary"
+                            onClick={handleUpdateCredentials}
+                        >
+                            Обновить логин и пароль
+                        </CButton>
                     </div>
                 </div>
                 <AppFooter />

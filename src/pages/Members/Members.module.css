@@ -1,0 +1,16 @@
+.title {
+    color: white;
+    display: block;
+    text-align: center;
+}
+
+
+.main {
+    margin: 0 auto;
+    max-width: 75vw;
+    height: auto;
+    display: flex;
+    justify-content: space-between;
+    align-content: center;
+    flex-wrap: wrap;
+}

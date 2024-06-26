@@ -9,6 +9,7 @@ import {
     CFormSelect,
     CListGroup,
     CListGroupItem,
+    CFormLabel,
 } from "@coreui/react";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
 
@@ -22,6 +23,7 @@ const EditGigs = () => {
     const [participants, setParticipants] = useState([]);
     const [selectedParticipantId, setSelectedParticipantId] = useState("");
     const [availableParticipants, setAvailableParticipants] = useState([]);
+    const [poster, setPoster] = useState(null);
     const navigate = useNavigate();
 
     const { id } = useParams();
@@ -81,6 +83,7 @@ const EditGigs = () => {
                 setVenue(gig.place);
                 setDate(gig.date_of_gig);
                 setStatus(gig.gig_status);
+                setPoster(gig.path_to_poster);
 
                 await fetchMembers();
                 await getMembers();
@@ -117,17 +120,20 @@ const EditGigs = () => {
         setValidated(true);
 
         if (form.checkValidity() !== false) {
-            const data = {
-                title: title,
-                social_link: socialLink,
-                venue: venue,
-                date: date,
-                status: status,
-                participants: participants,
-            };
+            const formData = new FormData();
+
+            formData.append("title", title);
+            formData.append("social_link", socialLink);
+            formData.append("venue", venue);
+            formData.append("date", date);
+            formData.append("status", status);
+            participants.forEach((participant, index) => {
+                formData.append(`participants[${index}][id]`, participant.id);
+            });
+            formData.append("poster", poster);
 
             axios
-                .put("http://localhost:3001/gigs/" + id + "", data)
+                .put("http://localhost:3001/gigs/" + id + "", formData)
                 .then((response) => {
                     alert("Выступление успешно обновлено");
                     navigate("/admin/gigs");
@@ -247,6 +253,16 @@ const EditGigs = () => {
                                     </CListGroupItem>
                                 ))}
                             </CListGroup>
+                        </CCol>
+                        <CCol md={12}>
+                            <CFormLabel htmlFor="poster">Афиша</CFormLabel>
+                            <CFormInput
+                                type="file"
+                                feedbackValid="Всё хорошо!"
+                                id="poster"
+                                required
+                                onChange={(e) => setPoster(e.target.files[0])}
+                            />
                         </CCol>
 
                         <CCol xs={12}>

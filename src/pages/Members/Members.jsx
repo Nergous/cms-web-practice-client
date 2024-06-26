@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import Modal from "../../components/Modal/Modal";
 import Member from "./Member/Member";
 import LazyLoad from "react-lazyload";
+import cl from "./Members.module.css";
 
 const Members = () => {
     const [modal, setModal] = useState(false);
@@ -11,9 +12,11 @@ const Members = () => {
     const fetchMembers = async () => {
         const response = await fetch("http://localhost:3001/members");
         const data = await response.json();
-        setMembers(data);
+        const filteredData = data.filter(item => item.is_member !== false);
+        console.log(filteredData)
+        setMembers(filteredData);
     };
-    
+
     useEffect(() => {
         fetchMembers();
     }, []);
@@ -36,65 +39,62 @@ const Members = () => {
 
     return (
         <div>
-            <h1
-                style={{
-                    color: "white",
-                    display: "block",
-                    textAlign: "center",
-                }}
-            >
-                Ето мы
-            </h1>
-            <div
-                style={{
-                    margin: "0 auto",
-                    maxWidth: "75vw",
-                    height: "auto",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignContent: "center",
-                }}
-            >
-                {members.map((member) => (
-                    <LazyLoad key={member.id} height={250} once>
-                        <button
-                            onClick={() => handleMemberClick(member)}
-                            onMouseEnter={() => handleMouseEnter(member.id)}
-                            onMouseLeave={handleMouseLeave}
-                            name={member.name_of_member}
-                            key={member.id}
-                            style={{
-                                height: "350px",
-                                width: "250px",
-                                margin: "50px",
-                                color:
-                                    hoveredId === member.id
-                                        ? "white"
-                                        : "transparent",
-                                backgroundImage: `url(${member.path_to_photo})`,
-                                backgroundColor:
-                                    hoveredId === member.id
-                                        ? "rgba(0, 0, 0, 0.5)"
-                                        : "transparent",
-                                backgroundBlendMode:
-                                    hoveredId === member.id
-                                        ? "overlay"
-                                        : "normal",
-                                backgroundSize: "cover",
-                                transition:
-                                    "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
-                                border: "none",
-                                cursor: "pointer",
-                                overflow: "hidden",
-                            }}
-                        >
-                            {member.name_of_member}
-                        </button>
-                    </LazyLoad>
-                ))}
-                <Modal visible={modal} setVisible={setModal}>
-                    <Member member={selectedMember} />
-                </Modal>
+            <h1 className={cl.title}>Ето мы</h1>
+            <div className={cl.main}>
+                {members.length === 0 && (
+                    <h1
+                        className={cl.title}
+                        style={{ textAlign: "center", margin: "0 auto" }}
+                    >
+                        Похоже здесь нет участников
+                    </h1>
+                )}
+                {members.length > 0 && (
+                    <>
+                        {members.map((member) => (
+                            <LazyLoad key={member.id} height={250} once>
+                                <button
+                                    onClick={() => handleMemberClick(member)}
+                                    onMouseEnter={() =>
+                                        handleMouseEnter(member.id)
+                                    }
+                                    onMouseLeave={handleMouseLeave}
+                                    name={member.name_of_member}
+                                    key={member.id}
+                                    style={{
+                                        height: "350px",
+                                        width: "250px",
+                                        margin: "50px",
+                                        color:
+                                            hoveredId === member.id
+                                                ? "white"
+                                                : "transparent",
+                                        backgroundImage: `url(${member.path_to_photo})`,
+                                        backgroundColor:
+                                            hoveredId === member.id
+                                                ? "rgba(0, 0, 0, 0.5)"
+                                                : "transparent",
+                                        backgroundBlendMode:
+                                            hoveredId === member.id
+                                                ? "overlay"
+                                                : "normal",
+                                        backgroundSize: "cover",
+                                        transition:
+                                            "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
+                                        border: "none",
+                                        cursor: "pointer",
+                                        overflow: "hidden",
+                                    }}
+                                >
+                                    {member.name_of_member}
+                                </button>
+                            </LazyLoad>
+                        ))}
+                        <Modal visible={modal} setVisible={setModal}>
+                            <Member member={selectedMember} />
+                        </Modal>
+                    </>
+                )}
             </div>
         </div>
     );

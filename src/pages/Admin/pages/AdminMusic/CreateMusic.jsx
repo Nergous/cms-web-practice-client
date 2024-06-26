@@ -75,6 +75,12 @@ const CreateMusic = () => {
         }
     };
 
+    const removeParticipant = (trackIndex, participantIndex) => {
+        const newTracks = [...tracks];
+        newTracks[trackIndex].participants.splice(participantIndex, 1);
+        setTracks(newTracks);
+    };
+
     const handleParticipantChange = (trackIndex, value) => {
         const newTracks = [...tracks];
         newTracks[trackIndex].selectedParticipant = value;
@@ -297,26 +303,30 @@ const CreateMusic = () => {
                                 </CCol>
                                 {track.participants.length > 0 && (
                                     <CCol md={12}>
-                                        <CFormSelect
-                                            feedbackValid="Всё хорошо!"
-                                            value={
-                                                Array.isArray(
-                                                    track.participants
-                                                )
-                                                    ? track.participants
-                                                    : [track.participants]
-                                            }
-                                            readOnly
-                                            multiple
-                                        >
+                                        <div>
                                             {track.participants.map(
-                                                (participant, index) => (
-                                                    <option key={index}>
+                                                (
+                                                    participant,
+                                                    participantIndex
+                                                ) => (
+                                                    <div key={participantIndex}>
                                                         {participant}
-                                                    </option>
+                                                        <CButton
+                                                            color="danger"
+                                                            size="sm"
+                                                            onClick={() =>
+                                                                removeParticipant(
+                                                                    trackIndex,
+                                                                    participantIndex
+                                                                )
+                                                            }
+                                                        >
+                                                            Удалить
+                                                        </CButton>
+                                                    </div>
                                                 )
                                             )}
-                                        </CFormSelect>
+                                        </div>
                                     </CCol>
                                 )}
                                 <CCol xs={12}>
