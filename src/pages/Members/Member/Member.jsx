@@ -40,9 +40,13 @@ const Member = ({ member }) => {
                     const memberRole = responseMemberRoles.data.filter(
                         (rol) => rol.id_member === member.id
                     );
-                    const memberRolesId = memberRole.map(role => role.id_role)
-                    const filteredRoles = responseRoles.data.filter(role => memberRolesId.includes(role.id));
-                    setRole(filteredRoles)
+                    const memberRolesId = memberRole.map(
+                        (role) => role.id_role
+                    );
+                    const filteredRoles = responseRoles.data.filter((role) =>
+                        memberRolesId.includes(role.id)
+                    );
+                    setRole(filteredRoles);
                 }
             } catch (error) {
                 console.error(error);
@@ -74,16 +78,25 @@ const Member = ({ member }) => {
                         <td className={cl.data_right}>
                             <p>{member.description}</p>
                             <hr />
-                            <p>
+                            <p style={{ textAlign: "left" }}>
+                                <b>Роль в группе:</b>{" "}
+                                {role.map((r) => r.role_name).join(", ")}
+                            </p>
+                            <p style={{ textAlign: "left" }}>
                                 Участник группы с{" "}
                                 {formatDate(member.date_start)}
                             </p>
-                            <p>Роль в группе: {role.map((r) => r.role_name).join(', ')}</p>
+
                             {member.date_end && (
-                                <p>Закончил: {formatDate(member.date_end)}</p>
+                                <p style={{ textAlign: "left" }}>
+                                    Закончил:{" "}
+                                    <b>{formatDate(member.date_end)}</b>
+                                </p>
                             )}
                             {!member.date_end && (
-                                <p>Является участником по сей день</p>
+                                <p style={{ textAlign: "left" }}>
+                                    Является участником по сей день
+                                </p>
                             )}
                         </td>
                     </tr>

@@ -14,6 +14,16 @@ const MusicPanel = ({ music }) => {
     const [musicAuthors, setMusicAuthors] = useState([]);
     const [trackAuthors, setTrackAuthors] = useState([]);
 
+    const getType = (type) => {
+        if (type === "single") {
+            return "Сингл";
+        } else if (type === "EP") {
+            return "EP";
+        } else if (type === "album") {
+            return "Альбом";
+        }
+    }
+
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -60,10 +70,7 @@ const MusicPanel = ({ music }) => {
     function getAuthorsForTrack(track, authors) {
         const trackAuthor = authors
             .filter((author) => author.id_track === track.id)
-            .map(
-                (author) =>
-                    members.find((m) => m.id === author.id_member)
-            );
+            .map((author) => members.find((m) => m.id === author.id_member));
         return trackAuthor;
     }
 
@@ -128,15 +135,18 @@ const MusicPanel = ({ music }) => {
     }
 
     return (
-        <div>
+        <>
             <div className={cl.parent}>
-                <div className={cl.div1}>{music.record_name}</div>
+                <div className={cl.div1}>{music.record_name} - {getType(music.type_of_record)}</div>
                 <div className={cl.div2}>
                     <img
                         className={cl.img}
                         src={music.path_to_cover}
                         alt="music"
                     ></img>
+                </div>
+                <div className={cl.div4}>
+                    Дата выпуска - {music.year_of_publish}
                 </div>
                 <div className={cl.div3}>
                     {tracksForRecord.map((track) => (
@@ -192,7 +202,7 @@ const MusicPanel = ({ music }) => {
                     </div>
                 </div>
             )}
-        </div>
+        </>
     );
 };
 

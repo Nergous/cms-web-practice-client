@@ -158,13 +158,13 @@ const EditMusic = () => {
 
             tracks.forEach((track, index) => {
                 if (track.file) {
-                    formData.append(`trackFiles`, track.file);
+                    formData.append(
+                        `trackFiles`,
+                        track.file,
+                        `trackFiles_${index}.mp3`
+                    );
                 }
             });
-
-            for (let [key, value] of formData.entries()) {
-                console.log(key, value);
-            }
 
             try {
                 const response = await axios.put(

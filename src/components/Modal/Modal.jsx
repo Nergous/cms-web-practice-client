@@ -1,5 +1,6 @@
 import React from "react";
 import cl from "./Modal.module.css";
+import CloseButton from "react-bootstrap/esm/CloseButton";
 
 const MyModal = ({ children, visible, setVisible }) => {
     const rootClasses = [cl.myModal];
@@ -7,7 +8,7 @@ const MyModal = ({ children, visible, setVisible }) => {
         rootClasses.push(cl.active);
     }
     return (
-        <div className={cl.back}>
+        <>
             <div
                 className={rootClasses.join(" ")}
                 onClick={() => setVisible(false)}
@@ -16,10 +17,11 @@ const MyModal = ({ children, visible, setVisible }) => {
                     className={cl.myModalContent}
                     onClick={(e) => e.stopPropagation()}
                 >
+                    <CloseButton onClick={() => setVisible(false)} />
                     {children}
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 

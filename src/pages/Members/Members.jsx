@@ -12,8 +12,8 @@ const Members = () => {
     const fetchMembers = async () => {
         const response = await fetch("http://localhost:3001/members");
         const data = await response.json();
-        const filteredData = data.filter(item => item.is_member !== false);
-        console.log(filteredData)
+        const filteredData = data.filter((item) => item.is_member !== false);
+        console.log(filteredData);
         setMembers(filteredData);
     };
 
@@ -38,7 +38,7 @@ const Members = () => {
     };
 
     return (
-        <div>
+        <>
             <h1 className={cl.title}>Ето мы</h1>
             <div className={cl.main}>
                 {members.length === 0 && (
@@ -52,7 +52,7 @@ const Members = () => {
                 {members.length > 0 && (
                     <>
                         {members.map((member) => (
-                            <LazyLoad key={member.id} height={250} once>
+                            <LazyLoad key={member.id} once>
                                 <button
                                     onClick={() => handleMemberClick(member)}
                                     onMouseEnter={() =>
@@ -61,10 +61,8 @@ const Members = () => {
                                     onMouseLeave={handleMouseLeave}
                                     name={member.name_of_member}
                                     key={member.id}
+                                    className={cl.member}
                                     style={{
-                                        height: "350px",
-                                        width: "250px",
-                                        margin: "50px",
                                         color:
                                             hoveredId === member.id
                                                 ? "white"
@@ -78,12 +76,8 @@ const Members = () => {
                                             hoveredId === member.id
                                                 ? "overlay"
                                                 : "normal",
-                                        backgroundSize: "cover",
-                                        transition:
-                                            "background-color 0.5s ease-in-out, color 0.5s ease-in-out",
-                                        border: "none",
-                                        cursor: "pointer",
-                                        overflow: "hidden",
+                                        backgroundPosition: "center",
+                                        fontSize: "25px",
                                     }}
                                 >
                                     {member.name_of_member}
@@ -96,7 +90,7 @@ const Members = () => {
                     </>
                 )}
             </div>
-        </div>
+        </>
     );
 };
 

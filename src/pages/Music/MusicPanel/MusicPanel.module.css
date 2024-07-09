@@ -5,6 +5,9 @@
     grid-column-gap: 0px;
     grid-row-gap: 0px;
     color: black;
+    max-height: 100vh;
+    overflow: hidden;
+    /* Чтобы дети не могли вылезти за пределы родителя */
 }
 
 .div1 {
@@ -19,11 +22,21 @@
 }
 
 .div3 {
-    grid-area: 2 / 2 / 8 / 3;
+    grid-area: 2 / 2 / 6 / 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    overflow-y: auto;
+    /* Использовать всю доступную высоту родителя */
+}
+
+.div4 {
+    grid-area: 6 / 2 / 7 / 3;
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    font-size: 25px;
 }
 
 .img {
@@ -74,6 +87,7 @@
     border-radius: 15px;
     pointer-events: none;
     transition: opacity 0.3s ease-in-out, visibility 0.3s ease-in-out, background-color 0.3s ease-in-out;
+    font-size: 20px;
 }
 
 .modal.active {
@@ -158,4 +172,12 @@
         transform: scale(0.9);
         opacity: 0;
     }
+}
+
+
+@media screen and (max-width: 1100px) {
+    .img {
+        max-width: 500px;
+    }
+    
 }

@@ -10,6 +10,7 @@ function CarouselMy({ imgs }) {
                 <Carousel className={cl.carousel__mine}>
                     {imgs.map((image, index) => (
                         <Carousel.Item key={index} interval={5000}>
+                            <div className={cl.carousel_item_container}></div>
                             <img
                                 className={cl.image__carousel}
                                 src={`/uploads/carousel/${image}`}
