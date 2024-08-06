@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Route, Routes, Navigate } from "react-router-dom";
+import Cookies from "js-cookie";
+import axios from "axios";
 
 import "./scss/style.scss";
 
@@ -21,10 +23,33 @@ import EditRoles from "./pages/AdminRoles/EditRoles";
 
 import AdminDashboard from "./pages/AdminDashboard/AdminDashboard";
 
-const DefaultLayout = React.lazy(() => import("./layout/DefaultLayout"));
-
 const Admin = () => {
-    const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const checkAuthenticate = async () => {
+        await axios
+            .get("http://localhost:3001/admin/checkAuth", {
+                withCredentials: true,
+            })
+            .then((response) => {
+                if (response.data.success) {
+                    setIsAuthenticated(true);
+                }
+                setIsLoading(false);
+            })
+            .catch((error) => {
+                setIsAuthenticated(false);
+                setIsLoading(false);
+            });
+    };
+    useEffect(() => {
+        checkAuthenticate();
+    }, []);
+
+    if (isLoading) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <>
             <Routes>
@@ -37,8 +62,14 @@ const Admin = () => {
                         <Route path="/music/:id/edit" element={<EditMusic />} />
 
                         <Route path="/members/*" element={<AdminMembers />} />
-                        <Route path="/members/create" element={<CreateMembers />} />
-                        <Route path="/members/:id/edit" element={<EditMembers />} />
+                        <Route
+                            path="/members/create"
+                            element={<CreateMembers />}
+                        />
+                        <Route
+                            path="/members/:id/edit"
+                            element={<EditMembers />}
+                        />
 
                         <Route path="/gigs/*" element={<AdminGigs />} />
                         <Route path="/gigs/create" element={<CreateGigs />} />

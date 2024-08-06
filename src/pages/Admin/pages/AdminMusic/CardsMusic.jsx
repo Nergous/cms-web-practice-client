@@ -8,12 +8,17 @@ import { Link } from "react-router-dom";
 
 const CardsMusic = ({ item }) => {
     const handleDelete = async () => {
+        const confirmDelete = window.confirm("Вы уверены что хотите удалить этот релиз?");
+        if (!confirmDelete) {
+            return;
+        }
+
         try {
-            await axios.delete(`http://localhost:3001/record/${item.id}`);
-            alert("Music deleted successfully");
+            await axios.delete(`http://localhost:3001/record/${item.id}`, { withCredentials: true });
+            alert("Релиз успешно удален");
             window.location.reload(true);
         } catch (error) {
-            console.error("Error deleting music:", error);
+            alert("Ошибка при удалении релиза:", error);
         }
     };
 
@@ -38,7 +43,7 @@ const CardsMusic = ({ item }) => {
                 />
                 <div style={{marginTop: "30px"}}>
                     <Link to={`/admin/music/${item.id}/edit`}>
-                        <Button style={{ marginRight: "10px" }} variant="dark">
+                        <Button style={{ marginRight: "10px" }} variant="info">
                             Редактировать
                         </Button>
                     </Link>

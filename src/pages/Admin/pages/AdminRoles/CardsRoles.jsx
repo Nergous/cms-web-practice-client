@@ -6,35 +6,43 @@ import { Link } from "react-router-dom";
 
 const CardsRoles = ({ item }) => {
     const handleDelete = async () => {
+        const confirmDelete = window.confirm(
+            "Вы уверены что хотите удалить эту роль?"
+        );
+        if (!confirmDelete) {
+            return;
+        }
+
         try {
-            await axios.delete(`http://localhost:3001/music_roles/${item.id}`);
-            alert("Role deleted successfully");
+            await axios.delete(`http://localhost:3001/music_roles/${item.id}`, {
+                withCredentials: true,
+            });
+            alert("Роль успешно удалена");
             window.location.reload(true);
         } catch (error) {
-            console.error("Error deleting role:", error);
+            console.error("Ошибка при удалении роли:", error);
         }
     };
 
     return (
         <Card
+            key={item.id}
+            className="flex-fill m-2 p-3"
             style={{
-                flex: "1 0 20%",
-                margin: "10px",
-                padding: "20px",
                 width: "18rem",
             }}
         >
             <Card.Body>
                 <Card.Title>{item.role_name}</Card.Title>
                 <hr />
-                <div style={{ marginTop: "30px" }}>
+                <div className="mt-3">
                     <Link to={`/admin/roles/${item.id}/edit`}>
-                        <Button style={{ marginRight: "10px" }} variant="dark">
+                        <Button className="m-2" variant="info">
                             Редактировать
                         </Button>
                     </Link>
                     <Button
-                        style={{ marginRight: "10px" }}
+                        className="m-2"
                         variant="danger"
                         onClick={handleDelete}
                     >

@@ -7,7 +7,6 @@
     color: black;
     max-height: 100vh;
     overflow: hidden;
-    /* Чтобы дети не могли вылезти за пределы родителя */
 }
 
 .div1 {
@@ -27,7 +26,6 @@
     flex-direction: column;
     align-items: center;
     overflow-y: auto;
-    /* Использовать всю доступную высоту родителя */
 }
 
 .div4 {

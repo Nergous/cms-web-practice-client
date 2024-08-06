@@ -3,15 +3,27 @@ import axios from "axios";
 import { AppSidebar, AppFooter, AppHeader } from "../components/index";
 import { useNavigate } from "react-router-dom";
 
-import { CForm, CFormInput, CButton, CImage } from "@coreui/react";
+import { CForm, CFormInput, CButton, CImage, CAlert } from "@coreui/react";
 
 const DefaultLayout = () => {
     const [text, setText] = useState("");
     const [files, setFiles] = useState(null);
+    const [logo, setLogo] = useState(null);
+    const [currentLogo, setCurrentLogo] = useState("/uploads/logo/logo.png");
     const [images, setImages] = useState([]);
     const [login, setLogin] = useState("");
     const [password, setPassword] = useState("");
+    const [textError, setTextError] = useState("");
+    const [textSuccess, setTextSuccess] = useState("");
+    const [filesError, setFilesError] = useState("");
+    const [filesSuccess, setFilesSuccess] = useState("");
+    const [logoError, setLogoError] = useState("");
+    const [logoSuccess, setLogoSuccess] = useState("");
+    const [credentialsError, setCredentialsError] = useState("");
+    const [credentialsSuccess, setCredentialsSuccess] = useState("");
     const textAreaRef = useRef(null);
+    const fileInputRef = useRef(null);
+    const logoInputRef = useRef(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -22,7 +34,7 @@ const DefaultLayout = () => {
                 );
                 setText(response.data.trimRight());
             } catch (error) {
-                console.log(error);
+                setTextError("Ошибка при загрузке текста");
             }
         };
         const loadImages = async () => {
@@ -32,7 +44,7 @@ const DefaultLayout = () => {
                 );
                 setImages(response.data);
             } catch (error) {
-                console.log(error);
+                setFilesError("Ошибка при загрузке изображений");
             }
         };
 
@@ -49,15 +61,27 @@ const DefaultLayout = () => {
 
     const handleSave = async (event) => {
         try {
-            await axios.post("http://localhost:3001/admin/save", { text });
-            alert("Текст успешно сохранен");
+            await axios.post(
+                "http://localhost:3001/admin/save",
+                {
+                    text,
+                },
+                { withCredentials: true }
+            );
+            setTextSuccess("Текст успешно сохранен");
+            setTextError("");
         } catch (error) {
-            alert("Произошла ошибка при сохранении текста");
+            setTextError(error.response.data.message);
+            setTextSuccess("");
         }
     };
 
     const handleFileChange = (event) => {
         setFiles(event.target.files);
+    };
+
+    const handleLogoChange = (event) => {
+        setLogo(event.target.files[0]);
     };
 
     const handleUpload = async () => {
@@ -74,31 +98,60 @@ const DefaultLayout = () => {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
-                }
+                    withCredentials: true,
+                },
             );
-            alert("Файлы успешно загружены");
+            setFilesSuccess("Файлы успешно загружены");
+            setFilesError("");
             const response = await axios.get(
                 "http://localhost:3001/admin/images"
             );
             setImages(response.data);
+            fileInputRef.current.value = ""; // Очистка формы
         } catch (error) {
-            alert("Произошла ошибка при загрузке файлов");
+            setFilesError(error.response.data);
+            setFilesSuccess("");
+        }
+    };
+
+    const handleUploadLogo = async () => {
+        const formData = new FormData();
+        formData.append("logo", logo);
+        try {
+            await axios.post(
+                "http://localhost:3001/admin/upload_logo",
+                formData,
+                {
+                    withCredentials: true,
+                }
+            );
+            setLogoSuccess("Логотип успешно загружен");
+            setLogoError("");
+            setCurrentLogo("/uploads/logo/logo.png");
+            logoInputRef.current.value = ""; // Очистка формы
+            window.location.reload();
+        } catch (error) {
+            setLogoError(error.response.data);
+            setLogoSuccess("");
         }
     };
 
     const handleDeleteImage = async (filename) => {
         try {
             await axios.delete(
-                `http://localhost:3001/admin/images/${filename}`
+                `http://localhost:3001/admin/images/${filename}`,
+                { withCredentials: true }
             );
-            alert("Файл успешно удален");
+            setFilesSuccess("Файл успешно удален");
+            setFilesError("");
             // Обновляем список изображений
             const response = await axios.get(
                 "http://localhost:3001/admin/images"
             );
             setImages(response.data);
         } catch (error) {
-            alert("Произошла ошибка при удалении файла");
+            setFilesError(error.response.data.message);
+            setFilesSuccess("");
         }
     };
 
@@ -107,11 +160,14 @@ const DefaultLayout = () => {
             await axios.post("http://localhost:3001/admin/update_credentials", {
                 login,
                 password,
-            });
-            alert("Логин и пароль успешно обновлены");
+            }, { withCredentials: true });
+            setCredentialsSuccess("Логин и пароль успешно обновлены");
+            setCredentialsError("");
             navigate("/admin");
         } catch (error) {
-            alert("Произошла ошибка при обновлении логина и пароля");
+            console.log(error);
+            setCredentialsError(error.response.data);
+            setCredentialsSuccess("");
         }
     };
 
@@ -121,7 +177,25 @@ const DefaultLayout = () => {
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
                 <div className="body flex-grow-1" style={{ margin: "30px" }}>
-                    Текст на главной странице
+                    {textError && (
+                        <CAlert
+                            color="danger"
+                            dismissible
+                            onClose={() => setTextError("")}
+                        >
+                            {textError}
+                        </CAlert>
+                    )}
+                    {textSuccess && (
+                        <CAlert
+                            color="success"
+                            dismissible
+                            onClose={() => setTextSuccess("")}
+                        >
+                            {textSuccess}
+                        </CAlert>
+                    )}
+                    <h3>Текст на главной странице</h3>
                     <CForm style={{ margin: "30px 0" }}>
                         <textarea
                             ref={textAreaRef}
@@ -138,47 +212,91 @@ const DefaultLayout = () => {
                     <CButton color="primary" onClick={handleSave}>
                         Сохранить
                     </CButton>
-                    <CForm style={{ margin: "30px 0" }}>
-                        <CFormInput
-                            type="file"
-                            multiple
-                            onChange={handleFileChange}
-                        />
-                    </CForm>
-                    <CButton color="primary" onClick={handleUpload}>
-                        Загрузить файлы
-                    </CButton>
                     <div style={{ margin: "30px 0" }}>
-                        {images.map((image, index) => (
-                            <div
-                                key={index}
-                                style={{
-                                    position: "relative",
-                                    display: "inline-block",
-                                    margin: "10px",
-                                }}
+                        {filesError && (
+                            <CAlert
+                                color="danger"
+                                dismissible
+                                onClose={() => setFilesError("")}
                             >
-                                <CImage
-                                    src={`/uploads/carousel/${image}`}
-                                    alt={image}
-                                    style={{ maxWidth: "200px" }}
-                                />
-                                <CButton
-                                    color="danger"
-                                    size="sm"
+                                {filesError}
+                            </CAlert>
+                        )}
+                        {filesSuccess && (
+                            <CAlert
+                                color="success"
+                                dismissible
+                                onClose={() => setFilesSuccess("")}
+                            >
+                                {filesSuccess}
+                            </CAlert>
+                        )}
+                        <h3>Фото карусель</h3>
+                        <CForm style={{ margin: "30px 0" }}>
+                            <CFormInput
+                                type="file"
+                                multiple
+                                onChange={handleFileChange}
+                                ref={fileInputRef}
+                            />
+                        </CForm>
+                        <CButton
+                            color="primary"
+                            onClick={handleUpload}
+                            disabled={!files}
+                        >
+                            Загрузить файлы
+                        </CButton>
+                        <div style={{ margin: "30px 0" }}>
+                            {images.map((image, index) => (
+                                <div
+                                    key={index}
                                     style={{
-                                        position: "absolute",
-                                        top: "5px",
-                                        right: "5px",
+                                        position: "relative",
+                                        display: "inline-block",
+                                        margin: "10px",
                                     }}
-                                    onClick={() => handleDeleteImage(image)}
                                 >
-                                    Удалить
-                                </CButton>
-                            </div>
-                        ))}
+                                    <CImage
+                                        src={`/uploads/carousel/${image}`}
+                                        alt={image}
+                                        style={{ maxWidth: "200px" }}
+                                    />
+                                    <CButton
+                                        color="danger"
+                                        size="sm"
+                                        style={{
+                                            position: "absolute",
+                                            top: "5px",
+                                            right: "5px",
+                                        }}
+                                        onClick={() => handleDeleteImage(image)}
+                                    >
+                                        Удалить
+                                    </CButton>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                     <div>
+                        {credentialsError && (
+                            <CAlert
+                                color="danger"
+                                dismissible
+                                onClose={() => setCredentialsError("")}
+                            >
+                                {credentialsError}
+                            </CAlert>
+                        )}
+                        {credentialsSuccess && (
+                            <CAlert
+                                color="success"
+                                dismissible
+                                onClose={() => setCredentialsSuccess("")}
+                            >
+                                {credentialsSuccess}
+                            </CAlert>
+                        )}
                         <h3>Изменить логин и пароль</h3>
                         <CForm style={{ margin: "30px 0" }}>
                             <CFormInput
@@ -189,6 +307,7 @@ const DefaultLayout = () => {
                             />
                             <CFormInput
                                 type="password"
+                                autoComplete="off"
                                 placeholder="Новый пароль"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
@@ -197,9 +316,50 @@ const DefaultLayout = () => {
                         <CButton
                             color="primary"
                             onClick={handleUpdateCredentials}
+                            disabled={!login || !password}
                         >
                             Обновить логин и пароль
                         </CButton>
+                    </div>
+                    <div style={{ margin: "30px 0" }}>
+                        {logoError && (
+                            <CAlert
+                                color="danger"
+                                dismissible
+                                onClose={() => setLogoError("")}
+                            >
+                                {logoError}
+                            </CAlert>
+                        )}
+                        {logoSuccess && (
+                            <CAlert
+                                color="success"
+                                dismissible
+                                onClose={() => setLogoSuccess("")}
+                            >
+                                {logoSuccess}
+                            </CAlert>
+                        )}
+                        <h3>Загрузить логотип</h3>
+                        <CForm style={{ margin: "30px 0" }}>
+                            <CFormInput
+                                type="file"
+                                onChange={handleLogoChange}
+                                ref={logoInputRef}
+                            />
+                        </CForm>
+                        <CButton
+                            color="primary"
+                            onClick={handleUploadLogo}
+                            disabled={!logo}
+                        >
+                            Загрузить логотип
+                        </CButton>
+                        <CImage
+                            src={currentLogo}
+                            alt="Логотип"
+                            style={{ maxWidth: "200px" }}
+                        />
                     </div>
                 </div>
                 <AppFooter />

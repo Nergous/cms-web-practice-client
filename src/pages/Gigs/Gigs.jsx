@@ -1,31 +1,44 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Gig from "./GIg/Gig";
 import Modal from "../../components/Modal/Modal";
-
+import Spinner from "../../components/Spinner/Spinner";
 import cl from "./Gigs.module.css";
 
 const Gigs = () => {
     const [gigs, setGigs] = useState([]);
-
-    useEffect(() => {
-        axios.get("http://localhost:3001/gigs").then((response) => {
-            setGigs(response.data);
-        });
-    }, []);
-
+    const [loading, setLoading] = useState(true);
     const [selectedGig, setSelectedGig] = useState(null);
     const [modal, setModal] = useState(false);
 
-    const handleGigClick = (gig) => {
+    useEffect(() => {
+        const fetchGigs = async () => {
+            try {
+                const response = await axios.get("http://localhost:3001/gigs");
+                setGigs(response.data);
+            } catch (error) {
+                console.error("Error fetching gigs:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchGigs();
+    }, []);
+
+    const handleGigClick = useCallback((gig) => {
         setSelectedGig(gig);
         setModal(true);
-    };
+    }, []);
+
+    if (loading) {
+        return <Spinner />;
+    }
 
     return (
         <div className={cl.gig__outer}>
             <h1 className={cl.gig__title}>Выступления</h1>
-            {gigs && (
+            {gigs.length > 0 ? (
                 <>
                     {gigs.map((gig) => (
                         <button
@@ -40,8 +53,7 @@ const Gigs = () => {
                         <Gig gig={selectedGig} />
                     </Modal>
                 </>
-            )}
-            {!gigs.length && (
+            ) : (
                 <h1 className={cl.gig__title}>Пока что нет выступлений</h1>
             )}
         </div>

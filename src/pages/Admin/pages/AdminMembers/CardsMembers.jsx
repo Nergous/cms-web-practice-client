@@ -3,15 +3,20 @@ import { Link } from "react-router-dom";
 import axios from "axios";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
+import CardImg from "react-bootstrap/CardImg";
 
 const CardsMembers = ({ item }) => {
     const handleDelete = async () => {
+        const confirmDelete = window.confirm("Вы уверены что хотите удалить этого участника?");
+        if (!confirmDelete) {
+            return;
+        }
         try {
-            await axios.delete(`http://localhost:3001/members/${item.id}`);
-            alert("Member deleted successfully");
+            await axios.delete(`http://localhost:3001/members/${item.id}`, { withCredentials: true });
+            alert("Участник успешно удален");
             window.location.reload(true);
         } catch (error) {
-            console.error("Error deleting member:", error);
+            alert("Ошибка при удалении участника:", error);
         }
     };
 
@@ -28,9 +33,16 @@ const CardsMembers = ({ item }) => {
                 <Card.Title>{item.name_of_member}</Card.Title>
                 <hr />
                 <Card.Text>{item.description}</Card.Text>
+                {item.path_to_photo !== "no img" ? (
+                    <CardImg
+                        variant="top"
+                        src={item.path_to_photo}
+                        style={{ height: "300px", width: "auto" }}
+                    />
+                ) : null}
                 <div style={{ marginTop: "30px" }}>
                     <Link to={`/admin/members/${item.id}/edit`}>
-                        <Button style={{ marginRight: "10px" }} variant="dark">
+                        <Button style={{ marginRight: "10px" }} variant="info">
                             Редактировать
                         </Button>
                     </Link>

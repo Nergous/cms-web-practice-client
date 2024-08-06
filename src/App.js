@@ -2,7 +2,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import MyHeader from "./components/header/MyHeader";
 import MyFooter from "./components/footer/MyFooter";
-import { HashRouter, Routes, Route, BrowserRouter } from "react-router-dom";
+import { Routes, Route, BrowserRouter } from "react-router-dom";
 import AppRouter from "./components/AppRouter/AppRouter";
 
 import Admin from "./pages/Admin/Admin";
@@ -19,12 +19,7 @@ function App() {
                         element={
                             <>
                                 <MyHeader />
-                                <div
-                                    className="main__part"
-                                    style={{
-                                        background: "black",
-                                    }}
-                                >
+                                <div className="main__part">
                                     <AppRouter />
                                 </div>
                                 <MyFooter />

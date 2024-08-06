@@ -1,5 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { CForm, CFormInput, CCol, CButton, CFormSelect } from "@coreui/react";
+import {
+    CForm,
+    CFormInput,
+    CCol,
+    CButton,
+    CFormSelect,
+    CListGroupItem,
+    CListGroup,
+    CFormLabel,
+    CAlert,
+    CImage,
+} from "@coreui/react";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -8,10 +19,13 @@ const CreateMusic = () => {
     const [recordName, setRecordName] = useState("");
     const [recordType, setRecordType] = useState("");
     const [cover, setCover] = useState(null);
+    const [coverPreview, setCoverPreview] = useState("");
     const [releaseYear, setReleaseYear] = useState("");
     const [members, setMembers] = useState([]);
     const [tracks, setTracks] = useState([]);
     const [validated, setValidated] = useState(false);
+    const [error, setError] = useState(null);
+    const [critError, setCritError] = useState(null);
 
     const navigate = useNavigate();
 
@@ -19,9 +33,8 @@ const CreateMusic = () => {
         try {
             const response = await axios.get("http://localhost:3001/members");
             setMembers(response.data);
-            console.log(response.data);
         } catch (error) {
-            console.error(error);
+            setCritError(error);
         }
     };
 
@@ -40,7 +53,16 @@ const CreateMusic = () => {
     };
 
     const handleCoverChange = (e) => {
-        setCover(e.target.files[0]);
+        const file = e.target.files[0];
+        if (file && (file.type === "image/jpeg" || file.type === "image/png")) {
+            setCover(file);
+            setCoverPreview(URL.createObjectURL(file));
+            setError(null);
+        } else {
+            setError(
+                "Неверный формат файла. Пожалуйста, выберите изображение в формате JPEG, JPG или PNG."
+            );
+        }
     };
 
     const handleReleaseYearChange = (e) => {
@@ -58,6 +80,7 @@ const CreateMusic = () => {
                 author: "",
                 participants: [],
                 selectedParticipant: "",
+                audioPreview: null,
             },
         ]);
     };
@@ -110,6 +133,7 @@ const CreateMusic = () => {
                     author: "",
                     participants: [],
                     selectedParticipant: "",
+                    audioPreview: null,
                 },
             ]);
         } else {
@@ -153,17 +177,29 @@ const CreateMusic = () => {
                 };
             });
             formData.append("tracks", JSON.stringify(tracksWithIds));
+            console.log(JSON.stringify(tracksWithIds));
 
             tracksWithIds.forEach((track, index) => {
                 if (track.file) {
-                    formData.append(`trackFiles`, track.file);
+                    if (
+                        track.file.type === "audio/mpeg" ||
+                        track.file.type === "audio/wav"
+                    ) {
+                        formData.append(`trackFiles`, track.file);
+                    } else {
+                        setError(
+                            "Неверный формат файла. Пожалуйста, загрузите файл в формате MP3 или WAV."
+                        );
+                        return;
+                    }
                 }
             });
 
             try {
                 const response = await axios.post(
                     "http://localhost:3001/record",
-                    formData
+                    formData,
+                    { withCredentials: true }
                 );
                 alert("Релиз успешно добавлен");
                 navigate("/admin/music");
@@ -179,175 +215,184 @@ const CreateMusic = () => {
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
                 <div className="body flex-grow-1" style={{ margin: "30px" }}>
-                    <CForm
-                        className="row g-3 needs-validation"
-                        validated={validated}
-                        onSubmit={handleSubmit}
+                    <CButton
+                        onClick={() => navigate("/admin/music")}
+                        color="primary"
+                        style={{ marginBottom: "30px" }}
                     >
-                        <CCol md={4}>
-                            <CFormInput
-                                type="text"
-                                feedbackValid="Всё хорошо!"
-                                id="record_name"
-                                label="Название альбома"
-                                placeholder="Альбом"
-                                required
-                                onChange={handleRecordNameChange}
-                            />
-                        </CCol>
-                        <CCol md={4}>
-                            <CFormSelect
-                                feedbackValid="Всё хорошо!"
-                                id="record_type"
-                                label="Тип записи"
-                                value={recordType}
-                                onChange={handleRecordTypeChange}
-                                required
-                            >
-                                <option value="">Выберите тип записи</option>
-                                <option value="EP">EP</option>
-                                <option value="single">single</option>
-                                <option value="album">album</option>
-                            </CFormSelect>
-                        </CCol>
-                        <CCol md={6}>
-                            <CFormInput
-                                type="file"
-                                feedbackInvalid="Invalid file type."
-                                id="cover"
-                                label="Обложка"
-                                required
-                                onChange={handleCoverChange}
-                            />
-                        </CCol>
-                        <CCol md={4}>
-                            <CFormInput
-                                type="date"
-                                placeholder="01.01.2001"
-                                feedbackValid="Всё хорошо!"
-                                id="release_year"
-                                label="Год выпуска"
-                                required
-                                onChange={handleReleaseYearChange}
-                            />
-                        </CCol>
-                        <CCol xs={12}>
-                            {(recordType !== "single" ||
-                                tracks.length === 0) && (
-                                <CButton
-                                    color="primary"
-                                    type="button"
-                                    onClick={addTrack}
+                        Назад
+                    </CButton>
+                    {error ? <CAlert color="danger">{error}</CAlert> : null}
+                    {critError ? (
+                        <CAlert color="danger">{critError}</CAlert>
+                    ) : (
+                        <CForm
+                            className="row g-3 needs-validation"
+                            validated={validated}
+                            onSubmit={handleSubmit}
+                        >
+                            <CCol md={8}>
+                                <CFormInput
+                                    type="text"
+                                    feedbackValid="Всё хорошо!"
+                                    id="record_name"
+                                    label="Название альбома"
+                                    placeholder="Альбом"
+                                    required
+                                    onChange={handleRecordNameChange}
+                                />
+                            </CCol>
+                            <CCol md={8}>
+                                <CFormSelect
+                                    feedbackValid="Всё хорошо!"
+                                    id="record_type"
+                                    label="Тип записи"
+                                    value={recordType}
+                                    onChange={handleRecordTypeChange}
+                                    required
                                 >
-                                    Добавить трек
-                                </CButton>
-                            )}
-                        </CCol>
-                        {tracks.map((track, trackIndex) => (
-                            <div key={trackIndex} className="row g-3">
-                                <CCol md={4}>
-                                    <CFormInput
-                                        type="text"
-                                        placeholder="Название трека"
-                                        feedbackValid="Всё хорошо!"
-                                        value={track.name}
-                                        onChange={(e) =>
-                                            handleTrackChange(
-                                                trackIndex,
-                                                "name",
-                                                e.target.value
-                                            )
-                                        }
-                                        required
+                                    <option value="">
+                                        Выберите тип записи
+                                    </option>
+                                    <option value="EP">EP</option>
+                                    <option value="single">single</option>
+                                    <option value="album">album</option>
+                                </CFormSelect>
+                            </CCol>
+                            <CCol md={8}>
+                                <CFormInput
+                                    type="file"
+                                    feedbackInvalid="Invalid file type."
+                                    id="cover"
+                                    label="Обложка"
+                                    required
+                                    onChange={handleCoverChange}
+                                />
+                                {coverPreview && (
+                                    <CImage
+                                        className="mt-3"
+                                        src={coverPreview}
+                                        alt="Cover Preview"
+                                        style={{ maxWidth: "200px" }}
                                     />
-                                </CCol>
-                                <CCol md={4}>
-                                    <CFormInput
-                                        type="file"
-                                        feedbackInvalid="Invalid file type."
-                                        onChange={(e) =>
-                                            handleTrackChange(
-                                                trackIndex,
-                                                "file",
-                                                e.target.files[0]
-                                            )
-                                        }
-                                        required
-                                    />
-                                </CCol>
-                                <CCol md={4}>
-                                    <CFormSelect
-                                        feedbackValid="Всё хорошо!"
-                                        value={track.author}
-                                        onChange={(e) =>
-                                            handleTrackChange(
-                                                trackIndex,
-                                                "author",
-                                                e.target.value
-                                            )
-                                        }
-                                        required
-                                    >
-                                        <option value="">
-                                            Выберите автора слов
-                                        </option>
-                                        {members.map((member) => (
-                                            <option
-                                                key={member.id}
-                                                value={member.name_of_member}
-                                            >
-                                                {member.name_of_member}
-                                            </option>
-                                        ))}
-                                    </CFormSelect>
-                                </CCol>
-                                {track.participants.length > 0 && (
-                                    <CCol md={12}>
-                                        <div>
-                                            {track.participants.map(
-                                                (
-                                                    participant,
-                                                    participantIndex
-                                                ) => (
-                                                    <div key={participantIndex}>
-                                                        {participant}
-                                                        <CButton
-                                                            color="danger"
-                                                            size="sm"
-                                                            onClick={() =>
-                                                                removeParticipant(
-                                                                    trackIndex,
-                                                                    participantIndex
-                                                                )
-                                                            }
-                                                        >
-                                                            Удалить
-                                                        </CButton>
-                                                    </div>
-                                                )
-                                            )}
-                                        </div>
-                                    </CCol>
                                 )}
-                                <CCol xs={12}>
-                                    <CCol md={4}>
-                                        <CFormSelect
+                            </CCol>
+                            <CCol md={8}>
+                                <CFormInput
+                                    type="date"
+                                    placeholder="01.01.2001"
+                                    feedbackValid="Всё хорошо!"
+                                    id="release_year"
+                                    label="Год выпуска"
+                                    required
+                                    onChange={handleReleaseYearChange}
+                                />
+                            </CCol>
+                            <CCol xs={8}>
+                                {(recordType !== "single" ||
+                                    tracks.length === 0) && (
+                                    <CButton
+                                        color="primary"
+                                        type="button"
+                                        onClick={addTrack}
+                                    >
+                                        Добавить трек
+                                    </CButton>
+                                )}
+                            </CCol>
+                            {tracks.map((track, trackIndex) => (
+                                <div key={trackIndex} className="row g-3">
+                                    <CCol md={8}>
+                                        <CFormInput
+                                            type="text"
+                                            placeholder="Название трека"
                                             feedbackValid="Всё хорошо!"
-                                            value={track.selectedParticipant}
+                                            value={track.name}
+                                            label={`Название трека ${
+                                                trackIndex + 1
+                                            }`}
                                             onChange={(e) =>
-                                                handleParticipantChange(
+                                                handleTrackChange(
                                                     trackIndex,
+                                                    "name",
                                                     e.target.value
                                                 )
                                             }
+                                            required
+                                        />
+                                    </CCol>
+                                    <CCol md={8}>
+                                        <CFormInput
+                                            type="file"
+                                            feedbackInvalid="Invalid file type."
+                                            onChange={(e) => {
+                                                const file = e.target.files[0];
+                                                // check mime types of file
+                                                if (
+                                                    file &&
+                                                    file.type !== "audio/mpeg"
+                                                ) {
+                                                    handleTrackChange(
+                                                        trackIndex,
+                                                        "file",
+                                                        null
+                                                    );
+                                                    handleTrackChange(
+                                                        trackIndex,
+                                                        "audioPreview",
+                                                        null
+                                                    );
+                                                    setError(
+                                                        "Неверный формат файла. Пожалуйста, выберите аудиофайл в формате MP3."
+                                                    );
+                                                    return;
+                                                }
+                                                if (file) {
+                                                    setError(null);
+                                                    handleTrackChange(
+                                                        trackIndex,
+                                                        "file",
+                                                        file
+                                                    );
+                                                    handleTrackChange(
+                                                        trackIndex,
+                                                        "audioPreview",
+                                                        URL.createObjectURL(
+                                                            file
+                                                        )
+                                                    );
+                                                }
+                                            }}
+                                            required
+                                        />
+                                        {track.audioPreview && (
+                                            <audio
+                                                className="mt-3"
+                                                controls
+                                                src={track.audioPreview}
+                                            >
+                                                Your browser does not support
+                                                the audio element.
+                                            </audio>
+                                        )}
+                                    </CCol>
+                                    <CCol md={8}>
+                                        <CFormSelect
+                                            feedbackValid="Всё хорошо!"
+                                            value={track.author}
+                                            onChange={(e) =>
+                                                handleTrackChange(
+                                                    trackIndex,
+                                                    "author",
+                                                    e.target.value
+                                                )
+                                            }
+                                            required
                                         >
                                             <option value="">
-                                                Выберите участника
-                                                (необязательно)
+                                                Выберите автора слов
                                             </option>
-                                            {getAvailableMembers(
-                                                trackIndex
-                                            ).map((member) => (
+                                            {members.map((member) => (
                                                 <option
                                                     key={member.id}
                                                     value={
@@ -359,28 +404,110 @@ const CreateMusic = () => {
                                             ))}
                                         </CFormSelect>
                                     </CCol>
+                                    {track.participants.length > 0 && (
+                                        <CCol md={8}>
+                                            <CFormLabel>
+                                                Авторы музыки
+                                            </CFormLabel>
+                                            <CListGroup>
+                                                {track.participants.map(
+                                                    (
+                                                        participant,
+                                                        participantIndex
+                                                    ) => (
+                                                        <CListGroupItem
+                                                            key={
+                                                                participantIndex
+                                                            }
+                                                        >
+                                                            {participant}
+                                                            <CButton
+                                                                color="danger"
+                                                                size="sm"
+                                                                className="float-end"
+                                                                onClick={() =>
+                                                                    removeParticipant(
+                                                                        trackIndex,
+                                                                        participantIndex
+                                                                    )
+                                                                }
+                                                            >
+                                                                Удалить
+                                                            </CButton>
+                                                        </CListGroupItem>
+                                                    )
+                                                )}
+                                            </CListGroup>
+                                        </CCol>
+                                    )}
+                                    <CCol xs={8}>
+                                        <CCol md={4}>
+                                            <CFormSelect
+                                                feedbackValid="Всё хорошо!"
+                                                value={
+                                                    track.selectedParticipant
+                                                }
+                                                onChange={(e) =>
+                                                    handleParticipantChange(
+                                                        trackIndex,
+                                                        e.target.value
+                                                    )
+                                                }
+                                            >
+                                                <option value="">
+                                                    Выберите участника
+                                                    (необязательно)
+                                                </option>
+                                                {getAvailableMembers(
+                                                    trackIndex
+                                                ).map((member) => (
+                                                    <option
+                                                        key={member.id}
+                                                        value={
+                                                            member.name_of_member
+                                                        }
+                                                    >
+                                                        {member.name_of_member}
+                                                    </option>
+                                                ))}
+                                            </CFormSelect>
+                                        </CCol>
+                                        <CButton
+                                            color="success"
+                                            type="button"
+                                            style={{
+                                                marginTop: "20px",
+                                                color: "white",
+                                            }}
+                                            onClick={() =>
+                                                addParticipant(trackIndex)
+                                            }
+                                            disabled={isAddParticipantButtonDisabled(
+                                                trackIndex
+                                            )}
+                                        >
+                                            Добавить участника записи
+                                        </CButton>
+                                    </CCol>
+                                </div>
+                            ))}
+                            <CCol xs={12}>
+                                {error ? (
                                     <CButton
-                                        color="success"
-                                        type="button"
-                                        style={{ marginTop: "20px" }}
-                                        onClick={() =>
-                                            addParticipant(trackIndex)
-                                        }
-                                        disabled={isAddParticipantButtonDisabled(
-                                            trackIndex
-                                        )}
+                                        color="primary"
+                                        disabled
+                                        type="submit"
                                     >
-                                        Добавить участника записи
+                                        Сохранить
                                     </CButton>
-                                </CCol>
-                            </div>
-                        ))}
-                        <CCol xs={12}>
-                            <CButton color="primary" type="submit">
-                                Сохранить
-                            </CButton>
-                        </CCol>
-                    </CForm>
+                                ) : (
+                                    <CButton color="primary" type="submit">
+                                        Сохранить
+                                    </CButton>
+                                )}
+                            </CCol>
+                        </CForm>
+                    )}
                 </div>
                 <AppFooter />
             </div>

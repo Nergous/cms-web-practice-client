@@ -11,7 +11,6 @@ const AdminGigs = () => {
         try {
             const response = await axios.get("http://localhost:3001/gigs");
             setItems(response.data);
-            console.log(response.data);
         } catch (error) {
             console.error(error);
         }

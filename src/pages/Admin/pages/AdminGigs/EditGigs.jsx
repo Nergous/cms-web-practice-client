@@ -10,6 +10,7 @@ import {
     CListGroup,
     CListGroupItem,
     CFormLabel,
+    CAlert,
 } from "@coreui/react";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
 
@@ -24,54 +25,27 @@ const EditGigs = () => {
     const [selectedParticipantId, setSelectedParticipantId] = useState("");
     const [availableParticipants, setAvailableParticipants] = useState([]);
     const [poster, setPoster] = useState(null);
+    const [currentPoster, setCurrentPoster] = useState("");
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     const { id } = useParams();
 
-    const getMembers = async () => {
+    const getMembers = async (currentParticipants) => {
         try {
             const response = await axios.get("http://localhost:3001/members");
             const data = response.data;
+            const filteredParticipants = data.filter(
+                (member) => !currentParticipants.some((p) => p.id == member.id)
+            );
 
-            setAvailableParticipants(data);
+            setAvailableParticipants(filteredParticipants);
         } catch (error) {
-            console.error(error);
+            setError("Ошибка при загрузке участников");
         }
     };
 
     useEffect(() => {
-        if (availableParticipants.length > 0 && participants.length > 0) {
-            const filteredMembers = availableParticipants.filter(
-                (member) => !participants.some((p) => p.id == member.id)
-            );
-            setAvailableParticipants(filteredMembers);
-        }
-    }, [participants, availableParticipants]);
-
-    useEffect(() => {
-        const fetchMembers = async () => {
-            try {
-                const response = await axios.get(
-                    "http://localhost:3001/gig_members"
-                );
-                const participantsAll = response.data;
-                const participants = participantsAll.filter(
-                    (p) => p.id_gig == id
-                );
-                const participant_data = await Promise.all(
-                    participants.map(async (p) => {
-                        const response = await axios.get(
-                            `http://localhost:3001/members/${p.id_member}`
-                        );
-                        return response.data;
-                    })
-                );
-                setParticipants(participant_data);
-            } catch (error) {
-                console.error(error);
-            }
-        };
-
         const fetchGig = async () => {
             try {
                 const response = await axios.get(
@@ -84,11 +58,11 @@ const EditGigs = () => {
                 setDate(gig.date_of_gig);
                 setStatus(gig.gig_status);
                 setPoster(gig.path_to_poster);
-
-                await fetchMembers();
-                await getMembers();
+                setParticipants(gig.members);
+                setCurrentPoster(gig.path_to_poster);
+                await getMembers(gig.members);
             } catch (error) {
-                console.error(error);
+                setError("Ошибка при загрузке выступления");
             }
         };
 
@@ -107,6 +81,19 @@ const EditGigs = () => {
                 )
             );
             setSelectedParticipantId("");
+        }
+    };
+
+    const handleRemoveParticipant = (participantId) => {
+        const removedParticipant = participants.find(
+            (p) => p.id == participantId
+        );
+        if (removedParticipant) {
+            setParticipants(participants.filter((p) => p.id != participantId));
+            setAvailableParticipants([
+                ...availableParticipants,
+                removedParticipant,
+            ]);
         }
     };
 
@@ -131,15 +118,17 @@ const EditGigs = () => {
                 formData.append(`participants[${index}][id]`, participant.id);
             });
             formData.append("poster", poster);
-
+            
             axios
-                .put("http://localhost:3001/gigs/" + id + "", formData)
+                .put("http://localhost:3001/gigs/" + id, formData, {
+                    withCredentials: true,
+                })
                 .then((response) => {
                     alert("Выступление успешно обновлено");
                     navigate("/admin/gigs");
                 })
                 .catch((error) => {
-                    alert("Произошла ошибка при обновлении выступления");
+                    alert(error.response.data.error);
                 });
         }
     };
@@ -150,12 +139,14 @@ const EditGigs = () => {
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
                 <div className="body flex-grow-1" style={{ margin: "30px" }}>
+                    {error && <CAlert color="danger">{error}</CAlert>}
+                    <CButton onClick={() => navigate("/admin/gigs")} className="mb-3" color="primary">Назад</CButton>
                     <CForm
                         className="row g-3 needs-validation"
                         validated={validated}
                         onSubmit={handleSubmit}
                     >
-                        <CCol md={4}>
+                        <CCol md={8}>
                             <CFormInput
                                 type="text"
                                 feedbackValid="Всё хорошо!"
@@ -167,7 +158,7 @@ const EditGigs = () => {
                                 onChange={(e) => setTitle(e.target.value)}
                             />
                         </CCol>
-                        <CCol md={4}>
+                        <CCol md={8}>
                             <CFormInput
                                 type="url"
                                 feedbackValid="Всё хорошо!"
@@ -179,7 +170,7 @@ const EditGigs = () => {
                                 onChange={(e) => setSocialLink(e.target.value)}
                             />
                         </CCol>
-                        <CCol md={4}>
+                        <CCol md={8}>
                             <CFormInput
                                 type="text"
                                 feedbackValid="Всё хорошо!"
@@ -191,7 +182,7 @@ const EditGigs = () => {
                                 onChange={(e) => setVenue(e.target.value)}
                             />
                         </CCol>
-                        <CCol md={6}>
+                        <CCol md={8}>
                             <CFormInput
                                 type="date"
                                 feedbackValid="Всё хорошо!"
@@ -203,7 +194,7 @@ const EditGigs = () => {
                                 onChange={(e) => setDate(e.target.value)}
                             />
                         </CCol>
-                        <CCol md={6}>
+                        <CCol md={8}>
                             <CFormSelect
                                 feedbackValid="Всё хорошо!"
                                 id="status"
@@ -217,7 +208,7 @@ const EditGigs = () => {
                                 <option value="canceled">Отменен</option>
                             </CFormSelect>
                         </CCol>
-                        <CCol md={6}>
+                        <CCol md={8}>
                             <CFormSelect
                                 value={selectedParticipantId}
                                 onChange={(e) =>
@@ -236,7 +227,7 @@ const EditGigs = () => {
                                 ))}
                             </CFormSelect>
                         </CCol>
-                        <CCol md={12}>
+                        <CCol md={8}>
                             <CButton
                                 color="primary"
                                 onClick={handleAddParticipant}
@@ -245,32 +236,56 @@ const EditGigs = () => {
                                 Добавить участника
                             </CButton>
                         </CCol>
-                        <CCol md={12}>
+                        <CCol md={8}>
                             <CListGroup>
                                 {participants.map((participant) => (
                                     <CListGroupItem key={participant.id}>
                                         {participant.name_of_member}
+                                        <CButton
+                                            color="danger"
+                                            size="sm"
+                                            className="float-end"
+                                            style={{ marginLeft: "10px" }}
+                                            onClick={() =>
+                                                handleRemoveParticipant(
+                                                    participant.id
+                                                )
+                                            }
+                                        >
+                                            Удалить
+                                        </CButton>
                                     </CListGroupItem>
                                 ))}
                             </CListGroup>
                         </CCol>
-                        <CCol md={12}>
+                        <CCol md={8}>
                             <CFormLabel htmlFor="poster">Афиша</CFormLabel>
                             <CFormInput
                                 type="file"
                                 feedbackValid="Всё хорошо!"
                                 id="poster"
-                                required
                                 onChange={(e) => setPoster(e.target.files[0])}
                             />
                         </CCol>
 
-                        <CCol xs={12}>
+                        <CCol xs={8}>
                             <CButton color="primary" type="submit">
                                 Обновить
                             </CButton>
                         </CCol>
                     </CForm>
+                    {poster && (
+                        <>
+                            <h3 style={{ marginTop: "20px" }}>Текущая афиша:</h3>
+                        <div style={{ marginTop: "20px" }}>
+                            <img
+                                src={currentPoster.replace('..', '')}
+                                alt="Афиша"
+                                style={{ maxWidth: "300px", height: "auto" }}
+                            />
+                        </div>
+                        </>
+                    )}
                 </div>
                 <AppFooter />
             </div>

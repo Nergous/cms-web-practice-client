@@ -10,6 +10,7 @@ import {
     CListGroup,
     CListGroupItem,
     CFormLabel,
+    CAlert,
 } from "@coreui/react";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
 
@@ -24,6 +25,8 @@ const CreateGigs = () => {
     const [selectedParticipantId, setSelectedParticipantId] = useState("");
     const [availableParticipants, setAvailableParticipants] = useState([]);
     const [poster, setPoster] = useState(null);
+    const [posterPreview, setPosterPreview] = useState(null);
+    const [error, setError] = useState(null);
     const navigate = useNavigate();
 
     const getMembers = () => {
@@ -33,7 +36,7 @@ const CreateGigs = () => {
                 setAvailableParticipants(response.data);
             })
             .catch((error) => {
-                console.error(error);
+                setError(error.message);
             });
     };
 
@@ -53,6 +56,35 @@ const CreateGigs = () => {
                 )
             );
             setSelectedParticipantId("");
+        }
+    };
+
+    const handleRemoveParticipant = (participantId) => {
+        const removedParticipant = participants.find(
+            (p) => p.id == participantId
+        );
+        if (removedParticipant) {
+            setParticipants(participants.filter((p) => p.id != participantId));
+            setAvailableParticipants([
+                ...availableParticipants,
+                removedParticipant,
+            ]);
+        }
+    };
+
+    const handlePosterChange = (e) => {
+        const file = e.target.files[0];
+        setPoster(file);
+
+        if (file && file.type.startsWith("image/")) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPosterPreview(reader.result);
+            };
+            reader.readAsDataURL(file);
+        } else {
+            setPosterPreview(null);
+            alert("Пожалуйста, выберите файл изображения.");
         }
     };
 
@@ -81,13 +113,18 @@ const CreateGigs = () => {
                     headers: {
                         "Content-Type": "multipart/form-data",
                     },
+                    withCredentials: true,
                 })
                 .then((response) => {
                     alert("Выступление успешно добавлено");
                     navigate("/admin/gigs");
                 })
                 .catch((error) => {
-                    alert("Произошла ошибка при добавлении выступления");
+                    console.log(error.response);
+                    alert(
+                        "Произошла ошибка при добавлении выступления:\n " +
+                            error.response.data.error
+                    );
                 });
         }
     };
@@ -98,12 +135,14 @@ const CreateGigs = () => {
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
                 <div className="body flex-grow-1" style={{ margin: "30px" }}>
+                    {error && <CAlert color="danger">{error}</CAlert>}
+                    <CButton onClick={() => navigate("/admin/gigs")} className="mb-3" color="primary">Назад</CButton>
                     <CForm
                         className="row g-3 needs-validation"
                         validated={validated}
                         onSubmit={handleSubmit}
                     >
-                        <CCol md={4}>
+                        <CCol md={8}>
                             <CFormInput
                                 type="text"
                                 feedbackValid="Всё хорошо!"
@@ -114,7 +153,7 @@ const CreateGigs = () => {
                                 onChange={(e) => setTitle(e.target.value)}
                             />
                         </CCol>
-                        <CCol md={4}>
+                        <CCol md={8}>
                             <CFormInput
                                 type="url"
                                 feedbackValid="Всё хорошо!"
@@ -125,7 +164,7 @@ const CreateGigs = () => {
                                 onChange={(e) => setSocialLink(e.target.value)}
                             />
                         </CCol>
-                        <CCol md={4}>
+                        <CCol md={8}>
                             <CFormInput
                                 type="text"
                                 feedbackValid="Всё хорошо!"
@@ -136,7 +175,7 @@ const CreateGigs = () => {
                                 onChange={(e) => setVenue(e.target.value)}
                             />
                         </CCol>
-                        <CCol md={6}>
+                        <CCol md={8}>
                             <CFormInput
                                 type="date"
                                 feedbackValid="Всё хорошо!"
@@ -147,7 +186,7 @@ const CreateGigs = () => {
                                 onChange={(e) => setDate(e.target.value)}
                             />
                         </CCol>
-                        <CCol md={6}>
+                        <CCol md={8}>
                             <CFormSelect
                                 feedbackValid="Всё хорошо!"
                                 id="status"
@@ -161,7 +200,7 @@ const CreateGigs = () => {
                                 <option value="canceled">Отменен</option>
                             </CFormSelect>
                         </CCol>
-                        <CCol md={6}>
+                        <CCol md={8}>
                             <CFormSelect
                                 value={selectedParticipantId}
                                 onChange={(e) =>
@@ -180,35 +219,59 @@ const CreateGigs = () => {
                                 ))}
                             </CFormSelect>
                         </CCol>
-                        <CCol md={12}>
+                        <CCol md={8}>
                             <CButton
                                 color="primary"
                                 onClick={handleAddParticipant}
-                                disabled={!availableParticipants.length}
+                                disabled={!selectedParticipantId}
                             >
                                 Добавить участника
                             </CButton>
                         </CCol>
-                        <CCol md={12}>
+                        <CCol md={8}>
                             <CListGroup>
                                 {participants.map((participant) => (
                                     <CListGroupItem key={participant.id}>
                                         {participant.name_of_member}
+                                        <CButton
+                                            color="danger"
+                                            size="sm"
+                                            className="float-end"
+                                            style={{ marginLeft: "10px" }}
+                                            onClick={() =>
+                                                handleRemoveParticipant(
+                                                    participant.id
+                                                )
+                                            }
+                                        >
+                                            Удалить
+                                        </CButton>
                                     </CListGroupItem>
                                 ))}
                             </CListGroup>
                         </CCol>
-                        <CCol md={12}>
+                        <CCol md={8}>
                             <CFormLabel htmlFor="poster">Афиша</CFormLabel>
                             <CFormInput
                                 id="poster"
                                 required
                                 type="file"
-                                onChange={(e) => setPoster(e.target.files[0])}
-                                
+                                onChange={handlePosterChange}
                             />
                         </CCol>
-                        <CCol xs={12}>
+                        {posterPreview && (
+                            <CCol md={8}>
+                                <h3>
+                                    Предварительный просмотр афиши:
+                                </h3>
+                                <img
+                                    src={posterPreview}
+                                    alt="Афиша"
+                                    style={{ maxWidth: "400px", height: "auto" }}
+                                />
+                            </CCol>
+                        )}
+                        <CCol xs={8}>
                             <CButton color="primary" type="submit">
                                 Сохранить
                             </CButton>

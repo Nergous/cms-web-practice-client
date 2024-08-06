@@ -1,48 +1,69 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import Modal from "../../components/Modal/Modal";
 import MusicPanel from "./MusicPanel/MusicPanel";
-
+import Spinner from "../../components/Spinner/Spinner";
+import MusicButton from "./MusicButton";
 import cl from "./Music.module.css";
 
 const Music = () => {
     const [musicList, setMusicList] = useState([]);
     const [selectedMusic, setSelectedMusic] = useState(null);
     const [modal, setModal] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        axios.get("http://localhost:3001/record").then((response) => {
-            setMusicList(response.data);
-        });
+        const fetchMusic = async () => {
+            try {
+                const response = await axios.get(
+                    "http://localhost:3001/record"
+                );
+                setMusicList(response.data);
+            } catch (err) {
+                setError(err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchMusic();
     }, []);
 
-    const handleMusicClick = (music) => {
+    const handleMusicClick = useCallback((music) => {
         setSelectedMusic(music);
         setModal(true);
-    };
+    }, []);
+
+    if (loading) {
+        return <Spinner />;
+    }
+
+    if (error) {
+        return (
+            <div className={cl.error}>
+                Ошибка при загрузке данных: {error.message}
+            </div>
+        );
+    }
+
     return (
         <div className={cl.music__container}>
             <h1 className={cl.music__title}>Музыка</h1>
-            {musicList.length > 0 && (
-                <>
-                    {musicList.map((music) => (
-                        <button
-                            className={cl.music}
-                            onClick={() => handleMusicClick(music)}
-                            title={music.record_name}
-                            key={music.id}
-                        >
-                            {music.record_name}
-                        </button>
-                    ))}
-                    <Modal visible={modal} setVisible={setModal}>
-                        <MusicPanel music={selectedMusic} />
-                    </Modal>
-                </>
-            )}
-            {musicList.length === 0 && (
+            {musicList.length > 0 ? (
+                musicList.map((music) => (
+                    <MusicButton
+                        key={music.id}
+                        music={music}
+                        handleMusicClick={handleMusicClick}
+                    />
+                ))
+            ) : (
                 <h2 className={cl.music__title}>Пока что здесь ничего нет</h2>
             )}
+            <Modal visible={modal} setVisible={setModal}>
+                <MusicPanel music={selectedMusic} />
+            </Modal>
         </div>
     );
 };

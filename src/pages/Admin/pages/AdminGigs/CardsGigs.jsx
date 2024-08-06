@@ -6,12 +6,16 @@ import Button from "react-bootstrap/Button";
 
 const CardsGigs = ({ item }) => {
     const handleDelete = async () => {
+        const confirmDelete = window.confirm("Вы уверены что хотите удалить этот gig?");
+        if (!confirmDelete) {
+            return;
+        }
         try {
-            await axios.delete(`http://localhost:3001/gigs/${item.id}`);
-            alert("Gig deleted successfully");
+            await axios.delete(`http://localhost:3001/gigs/${item.id}`, { withCredentials: true });
+            alert("Выступление успешно удалено");
             window.location.reload();
         } catch (error) {
-            console.error(error);
+            alert("Произошла ошибка при удалении выступления");
         }
     };
     return (
@@ -28,12 +32,14 @@ const CardsGigs = ({ item }) => {
                 <hr></hr>
                 <Card.Text>
                     Место: {item.place}
+                    <br/>
                     Ссылка на соц. сети:{" "}
                     <a href={item.link_to_social}>{item.link_to_social}</a>
                 </Card.Text>
+                <Card.Img variant="top" src={item.path_to_poster} style={{ width: "300px" }} />
                 <div style={{ marginTop: "30px" }}>
                     <Link to={`/admin/gigs/${item.id}/edit`}>
-                        <Button style={{ marginRight: "10px" }} variant="dark">
+                        <Button style={{ marginRight: "10px" }} variant="info">
                             Редактировать
                         </Button>
                     </Link>

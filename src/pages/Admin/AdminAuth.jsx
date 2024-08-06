@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/esm/Button";
-
+import axios from "axios";
 
 const Auth = () => {
     const [login, setLogin] = useState("");
@@ -9,23 +9,31 @@ const Auth = () => {
     const [error, setError] = useState("");
     const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        if (
-            login === process.env.REACT_APP_ADMIN_LOGIN &&
-            password === process.env.REACT_APP_ADMIN_PASSWORD
-        ) {
-            localStorage.setItem("isAuthenticated", "true");
-            navigate("/admin");
-        } else {
+        try {
+            const response = await axios.post(
+                "http://localhost:3001/admin/login",
+                {
+                    username: login,
+                    password: password,
+                },
+                { withCredentials: true }
+            );
+            if (response.data.success) {
+                navigate("/admin");
+            } else {
+                setError("Invalid login or password");
+            }
+        } catch (error) {
             setError("Invalid login or password");
         }
     };
 
     return (
-        <div style={{color: "white"}}>
+        <div style={{ color: "white" }}>
             <h2 style={{ color: "white", margin: "30px" }}>Войти</h2>
-            {error && <p style={{margin: "30px"}}>{error}</p>}
+            {error && <p style={{ margin: "30px" }}>{error}</p>}
             <form onSubmit={handleSubmit}>
                 <table>
                     <tbody>

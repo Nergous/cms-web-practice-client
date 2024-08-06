@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { CForm, CCol, CFormInput, CButton } from "@coreui/react";
+import { CForm, CCol, CFormInput, CButton, CLink } from "@coreui/react";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
 
 function CreateRole() {
@@ -23,7 +23,7 @@ function CreateRole() {
             try {
                 const response = await axios.post(
                     "http://localhost:3001/music_roles",
-                    data
+                    data, { withCredentials: true }
                 );
                 alert("Роль успешно создана");
                 navigate("/admin/roles");
@@ -38,13 +38,15 @@ function CreateRole() {
             <AppSidebar />
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
-                <div className="body flex-grow-1" style={{ margin: "30px" }}>
+                <div className="body flex-grow-1 m-3">
+                    <CButton
+                        onClick={() => navigate("/admin/roles")} className="btn btn-primary mb-3">Назад</CButton>
                     <CForm
                         className="row g-3 needs-validation"
                         validated={validated}
                         onSubmit={handleSubmit}
                     >
-                        <CCol md={4}>
+                        <CCol md={8}>
                             <CFormInput
                                 type="text"
                                 feedbackValid="Всё хорошо!"
@@ -55,7 +57,7 @@ function CreateRole() {
                                 onChange={(e) => setRoleName(e.target.value)}
                             />
                         </CCol>
-                        <CCol xs={12}>
+                        <CCol xs={8}>
                             <CButton color="primary" type="submit">
                                 Сохранить
                             </CButton>

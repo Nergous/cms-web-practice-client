@@ -3,8 +3,8 @@ import axios from "axios";
 import cl from "./Gig.module.css";
 
 const Gig = ({ gig }) => {
-    const [members, setMembers] = useState([]);
-    const [gigMembers, setGigMembers] = useState([]);
+    const [gigData, setGigData] = useState(null);
+
     const formatDate = (dateString) => {
         const months = [
             "января",
@@ -28,23 +28,17 @@ const Gig = ({ gig }) => {
     };
 
     useEffect(() => {
-        const fetchMembers = async () => {
-            try {
-                setMembers([]);
-                setGigMembers([]);
-                const responseMembers = await axios.get(
-                    "http://localhost:3001/members"
-                );
-                const responseGigMembers = await axios.get(
-                    `http://localhost:3001/gig_members/${gig.id}`
-                );
-                setMembers(responseMembers.data);
-                setGigMembers(responseGigMembers.data);
-            } catch (error) {
-                console.error(error);
-            }
-        };
         if (gig) {
+            const fetchMembers = async () => {
+                try {
+                    const response = await axios.get(
+                        "http://localhost:3001/gigs/" + gig.id
+                    );
+                    setGigData(response.data);
+                } catch (error) {
+                    console.error(error);
+                }
+            };
             fetchMembers();
         }
     }, [gig]);
@@ -87,21 +81,15 @@ const Gig = ({ gig }) => {
                                     Ссылка на соц. сети
                                 </a>
                             </p>
-                            {gigMembers && (
+                            {gigData && gigData.members && (
                                 <>
                                     <h3>Участники</h3>
                                     <ul className={cl.list}>
-                                        {/* filter members where id in gigMembers */}
-                                        {gigMembers.map((gm) => {
-                                            const member = members.find(
-                                                (m) => m.id === gm.id_member
-                                            );
-                                            return (
-                                                <li key={gm.id_member}>
-                                                    {member.name_of_member}
-                                                </li>
-                                            );
-                                        })}
+                                        {gigData.members.map((gm) => (
+                                            <li key={gm.id}>
+                                                {gm.name_of_member}
+                                            </li>
+                                        ))}
                                     </ul>
                                 </>
                             )}

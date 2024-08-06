@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { CForm, CCol, CFormInput, CButton } from "@coreui/react";
+import { CForm, CCol, CFormInput, CLink, CButton } from "@coreui/react";
 import axios from "axios";
 import { AppSidebar, AppHeader, AppFooter } from "../../components";
 import { useNavigate, useParams } from "react-router-dom";
@@ -40,7 +40,7 @@ function EditRole() {
             try {
                 const response = await axios.put(
                     `http://localhost:3001/music_roles/${id}`,
-                    data
+                    data, { withCredentials: true }
                 );
                 navigate("/admin/roles");
                 alert("Роль успешно обновлена");
@@ -55,13 +55,15 @@ function EditRole() {
             <AppSidebar />
             <div className="wrapper d-flex flex-column min-vh-100">
                 <AppHeader />
-                <div className="body flex-grow-1" style={{ margin: "30px" }}>
+                <div className="body flex-grow-1 p-3" >
+                    <CButton
+                        onClick={() => navigate("/admin/roles")} className="btn btn-primary mb-3">Назад</CButton>
                     <CForm
                         className="row g-3 needs-validation"
                         validated={validated}
                         onSubmit={handleSubmit}
                     >
-                        <CCol md={4}>
+                        <CCol md={8}>
                             <CFormInput
                                 type="text"
                                 feedbackValid="Всё хорошо!"
@@ -73,7 +75,7 @@ function EditRole() {
                                 onChange={(e) => setRoleName(e.target.value)}
                             />
                         </CCol>
-                        <CCol xs={12}>
+                        <CCol xs={8}>
                             <CButton color="primary" type="submit">
                                 Обновить
                             </CButton>

@@ -32,8 +32,9 @@ const AppHeader = () => {
     const { colorMode, setColorMode } = useColorModes(
         "coreui-free-react-admin-template-theme"
     );
-
+    
     useEffect(() => {
+        setColorMode("light");
         document.addEventListener("scroll", () => {
             headerRef.current &&
                 headerRef.current.classList.toggle(
